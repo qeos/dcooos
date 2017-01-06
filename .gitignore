@@ -31,3 +31,13 @@
 # Debug files
 *.dSYM/
 *.su
+
+# binary files
+*.bin
+
+# VMWare
+VMImage/dcooos.vmx.lck/*
+VMImage/*.log
+VMImage/*.vmdk
+VMImage/*.nvram
+VMImage/*.vmsd
