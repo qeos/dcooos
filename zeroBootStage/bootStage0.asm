@@ -16,18 +16,21 @@
 
 [BITS 16]
 
-bootstart:
+bootStart:
     jmp startup
 
 ; --------------------------------------------
 ; we may put to that place some drive info
 ; --------------------------------------------
-    Boot_ver    db 0x00
-    Boot_ident  db "DCOOOS"
-    Boot_length dw 0x01
+    bootVersion db 0x00         ; reserved for futures
+    bootIdent   db "DCOOOS"
+    bootLength  dw 0x02         ; count of boot blocks must be load for stage 1
+; --------------------------------------------
+; this boot variables
+; --------------------------------------------
+    bootDrive   db 0
 
 
-errorstring db 'zeroBootStage: boot up normal',0
 startup:
     mov ax,BOOT_SEGMENT
     mov ds,ax
@@ -41,14 +44,8 @@ startup:
     movsw
     jmp DEF_INITSEG:go
 
-go:
-    mov ax, cs
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
-    mov sp, 0x0000
-
-    mov si, errorstring
+; if we has error
+errorString db 'bootStage0: Error while loading code of stage 1.',0
 fail:
     mov ah, 0x0e
     mov bl, 0x47
@@ -59,7 +56,28 @@ fail:
     jne fail
     jmp $
 
+go:
+    mov ax, cs
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x0000
 
-; sign end of boot block
-times 510-($-$$) db 0
-dw 0AA55h
+    ; save boot drive
+    mov [bootDrive], dl
+
+    ; load
+    mov ax, [bootLength]
+    dec ax
+    mov ah, 0x02
+    mov bx, DEF_INITSEG
+    mov es, bx
+    mov bx, 0x0200
+    mov cx, 0x0002
+    mov dh, 0x00
+    mov dl, [bootDrive]
+    int 0x13
+    mov si, errorString
+    jc fail
+
+%include "bootStage1.asm"

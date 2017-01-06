@@ -1,15 +1,22 @@
-Требования к системе
---------------------
-Для обеспечения компилирования кода требуется установить следующие ПО:
-под окружение Windows:
+Base description
+----------------
+
+This is some realisation of kernel with some futures.
+Kernel based on intel x64 architecture.
+
+
+Sytem requirements for compilation
+----------------------------------
+For provide compiling a code you need to install some software:
+Windows enviroment:
 - CodeBlocks 16.01
 - Cygwin GCC
-    - NASM
+    - NASM 2.10.05
 - FASM 1.71.39
 
-Запуск и компилирование
------------------------
-В CodeBlocks открыть рабочее место dcooos.workspace
-Порядок компилирования проектов:
+Compiling and running
+---------------------
+In CodeBlocks open workspace 'dcooos.workspace'
+Compiling order is:
 - zeroBootStage
 - HDDImage
