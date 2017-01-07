@@ -257,8 +257,43 @@ nearJump:
 
 
 ; -------------------------------------------------------
+; prepare paging
+; -------------------------------------------------------
+    ; set PML4T
+    mov edi, 0x1000
+    mov cr3, edi
+    xor eax, eax
+    mov es, ax
+    mov ds, ax
+    mov ecx, 4096
+    rep stosd
+    mov edi, cr3
+
+    ; PDPT
+    mov DWORD [edi], 0x2003      ; Set the uint32_t at the destination index to 0x2003.
+    add edi, 0x1000              ; Add 0x1000 to the destination index.
+    mov DWORD [edi], 0x3003      ; Set the uint32_t at the destination index to 0x3003.
+    add edi, 0x1000              ; Add 0x1000 to the destination index.
+    mov DWORD [edi], 0x4003      ; Set the uint32_t at the destination index to 0x4003.
+    add edi, 0x1000              ; Add 0x1000 to the destination index.
+
+    mov ebx, 0x00000003          ; Set the B-register to 0x00000003.
+    mov ecx, 512                 ; Set the C-register to 512.
+
+.SetEntry:
+    mov DWORD [edi], ebx         ; Set the uint32_t at the destination index to the B-register.
+    add ebx, 0x1000              ; Add 0x1000 to the B-register.
+    add edi, 8                   ; Add eight to the destination index.
+    loop .SetEntry               ; Set the next entry.
+
+    ; restore ds
+    mov eax, DEF_INITSEG
+    mov ds, ax
+
+; -------------------------------------------------------
 ; Goto protected mode
 ; -------------------------------------------------------
+
     ; enable A20
     in  al, 0x92
     or  al, 2
@@ -276,15 +311,15 @@ nearJump:
     or eax, 1 << 8
     wrmsr
 
+; PAE
+    mov eax, cr4
+    or ax, 1 << 5
+    mov cr4, eax
+
+; paging and protect
     mov eax, cr0
-    or eax, 1 << 0
+    or eax, 1 << 31 | 1 << 0
     mov cr0, eax
-
-; is this need? PAE
-;    mov eax, cr4
-;    or ax, 0x20
-;    mov cr4, eax
-
 
     lgdt [gdt.pointer]
     jmp gdt.code:do_pm+DEF_INITSEG*0x10
@@ -301,6 +336,9 @@ do_pm:
     mov gs, ax
     mov fs, ax
 
+    ; Update RSP
+    mov rsp, KERNEL_STACK_BASE
+
     ; copy kernel to upper mem
     mov rsi, (ARC_KERNELSEG*0x10)
     xor rcx, rcx
@@ -314,19 +352,16 @@ do_pm:
     and rcx, 3
     rep movsb
 
-    ; Update ESP
-    mov rsp, KERNEL_STACK_BASE
-
 
 ; Execute the binary file that was loaded previously
 ; -------------------------------------------------------
-    mov rsp, KERNEL_STACK_BASE
     mov dl, [DEF_INITSEG*0x10+bootDrive]
     ; change for x64
     ;jmp gdt.code:KERNEL_CODE_BASE
-    push word gdt.code
-    push qword KERNEL_CODE_BASE
-    retf
+    ;push word gdt.code
+    ;push qword KERNEL_CODE_BASE
+    ;lret
+    jmp KERNEL_CODE_BASE - DEF_INITSEG*0x10
 
 
 ; -----------------------------------------------
