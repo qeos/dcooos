@@ -41,3 +41,10 @@ VMImage/*.log
 VMImage/*.vmdk
 VMImage/*.nvram
 VMImage/*.vmsd
+
+#some compiler
+kernel64/*.i
+kernel64/*.s
+*.map
+
+

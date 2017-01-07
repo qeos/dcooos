@@ -61,3 +61,5 @@ cleanShutdown = "TRUE"
 softPowerOff = "FALSE"
 ide0:0.present = "FALSE"
 floppy0.present = "FALSE"
+debugStub.listen.guest32=1
+checkpoint.vmState = ""

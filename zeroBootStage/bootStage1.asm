@@ -165,7 +165,7 @@ loadSector:
 ; -------------------------------------------------------
 ; MAIN
 ; -------------------------------------------------------
-errorString3 db 'bootStage1: Bad file system.',0
+errorString3 db 'bootStage1: Bad FS.',0
 
 loadKernel:
 
@@ -202,6 +202,29 @@ loadKernel:
 times 510-($-$$) db 0
 dw 0AA55h
 
+; -------------------------------------------------------
+; load all sector in LBA mode for block
+; -------------------------------------------------------
+; DX:CX:BX:AX - sector
+; ES:SI - place
+loadBlock:
+    call loadSector
+    push ds
+    mov di, AT_SEG
+    mov ds, di
+    mov di, ax
+    imul di, 4
+    mov ax, [ds:di]
+    mov bx, [ds:di+2]
+    pop ds
+    mov di, es
+    add di, 0x0020
+    mov es, di
+    cmp bx, 0xffff
+    jne loadBlock
+    cmp ax, 0xffff
+    jne loadBlock
+    ret
 
 nearJump:
 
@@ -217,5 +240,119 @@ nearJump:
     mov si, AT_SEG
     mov es, si
     mov si, 0x0000
-    call load_block
+    call loadBlock
 
+; load kernel
+    mov si, SB_SEG
+    mov es, si
+    mov ax, [es:0x1e]
+    mov bx, [es:0x1e+2]
+    mov cx, 0x0000
+    mov dx, 0x0000
+    mov si, ARC_KERNELSEG
+    mov es, si
+    mov si, 0x0000
+    call loadBlock
+
+
+
+; -------------------------------------------------------
+; Goto protected mode
+; -------------------------------------------------------
+    ; enable A20
+    in  al, 0x92
+    or  al, 2
+    out 0x92, al
+
+    ; cli
+    cli
+    in  al, 0x70
+    or  al, 0x80
+    out 0x70, al
+
+; set EFER
+    mov ecx, 0xc0000080
+    rdmsr
+    or eax, 1 << 8
+    wrmsr
+
+    mov eax, cr0
+    or eax, 1 << 0
+    mov cr0, eax
+
+; is this need? PAE
+;    mov eax, cr4
+;    or ax, 0x20
+;    mov cr4, eax
+
+
+    lgdt [gdt.pointer]
+    jmp gdt.code:do_pm+DEF_INITSEG*0x10
+
+[BITS 64]    ; All code from now on will be 64-bit
+
+do_pm:
+
+    mov ax, gdt.data          ; Update the segment registers
+    mov ds, ax                ; To complete the transfer to
+    mov es, ax                ; 64-bit mode
+    mov ss, ax
+    xor rax, rax
+    mov gs, ax
+    mov fs, ax
+
+    ; copy kernel to upper mem
+    mov rsi, (ARC_KERNELSEG*0x10)
+    xor rcx, rcx
+    mov ecx, [rsi]
+    mov rsi, ARC_KERNELSEG*0x10+4;
+    mov rdi, KERNEL_CODE_BASE
+    push rcx
+    shr rcx, 2
+    rep movsd
+    pop rcx
+    and rcx, 3
+    rep movsb
+
+    ; Update ESP
+    mov rsp, KERNEL_STACK_BASE
+
+
+; Execute the binary file that was loaded previously
+; -------------------------------------------------------
+    mov rsp, KERNEL_STACK_BASE
+    mov dl, [DEF_INITSEG*0x10+bootDrive]
+    ; change for x64
+    ;jmp gdt.code:KERNEL_CODE_BASE
+    push word gdt.code
+    push qword KERNEL_CODE_BASE
+    retf
+
+
+; -----------------------------------------------
+;                      GDT
+; -----------------------------------------------
+gdt:
+    .null
+        times 8 db 0            ; NULL Descriptor
+
+    .code equ  $-gdt
+        dw 0            ; limit 15:0
+        dw 0            ; base 15:0
+        db 0            ; base 23:16
+        db 0x9A         ; type = present, ring 0, code, non-conforming, readable
+        db 0x20         ; long mode
+        db 0            ; base 31:24
+
+    .data equ  $-gdt
+        dw 0            ; limit 15:0
+        dw 0            ; base 15:0
+        db 0            ; base 23:16
+        db 0x92         ; type = present, ring 0, data, expand-up, writable
+        db 0x20         ;
+        db 0            ; base 31:24
+    .pointer
+        dw $ - gdt - 1
+        dq gdt + DEF_INITSEG*0x10
+
+times (($-$$)/512+1)*512-($-$$) db 0

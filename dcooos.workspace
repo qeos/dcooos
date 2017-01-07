@@ -3,5 +3,6 @@
 	<Workspace title="Workspace">
 		<Project filename="zeroBootStage/zeroBootStage.cbp" />
 		<Project filename="kernel64/kernel64.cbp" />
+		<Project filename="HDDImage/HDDImage.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
