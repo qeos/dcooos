@@ -1,5 +1,17 @@
 # depslib dependency file v1.0
-1483754806 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
+1483827274 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1483826673 source:d:\work\build\os\dcooos\kernel64\main.c
+1483919087 source:d:\work\build\os\dcooos\kernel64\main.c
+	"types.h"
+	"serial.h"
+
+1483918707 d:\work\build\os\dcooos\kernel64\types.h
+
+1483919891 d:\work\build\os\dcooos\kernel64\serial.h
+
+1483919408 source:d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
+	"../types.h"
+
+1483919891 source:d:\work\build\os\dcooos\kernel64\serial.c
+	"types.h"
 

@@ -1,17 +1,24 @@
+#include "types.h"
+#include "serial.h"
+
+u1 bootDevice;
+
 void _main(){
     // *********************************************************************
     // INITIALIZATION
     // *********************************************************************
 
-    char *scr = 0xb8000;
+    asm("movb %%dl, %0":"=r"(bootDevice));
+
+    // init serial
+    init_serial();
 
     char *s = "Hello world from kernel under x64";
-
     do{
-        *scr++ = *s++;
-        *scr++ = 0xff;
+        serial_out(*s++);
     }while(*s != 0);
 
     while(1==1);
+
 
 }

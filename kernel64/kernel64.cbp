@@ -36,6 +36,19 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="main.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="serial.c">
+			<Option compilerVar="CC" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="serial.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="types.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -63,3 +63,6 @@ ide0:0.present = "FALSE"
 floppy0.present = "FALSE"
 debugStub.listen.guest32=1
 checkpoint.vmState = ""
+serial0.present = "TRUE"
+serial0.fileType = "file"
+serial0.fileName = "serial.out"
