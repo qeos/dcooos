@@ -1,5 +1,5 @@
+#include "main.h"
 #include "types.h"
-#include "serial.h"
 
 u1 bootDevice;
 
@@ -13,10 +13,12 @@ void _main(){
     // init serial
     init_serial();
 
-    char *s = "Hello world from kernel under x64";
-    do{
-        serial_out(*s++);
-    }while(*s != 0);
+#if DEBUG_LEVEL & E_NOTICE
+    printk_syslog("--------------------------------------------------------------------------\n");
+    printk_syslog("System boot up...\n\n");
+#endif // DEBUG_LEVEL
+
+    init_time();
 
     while(1==1);
 

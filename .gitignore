@@ -43,6 +43,10 @@ VMImage/*.nvram
 VMImage/*.vmsd
 VMImage/serial.out
 
+# BOCHS
+BOCHSImage/*.out
+BOCHSImage/*.ini
+
 #some compiler
 kernel64/*.i
 kernel64/*.s

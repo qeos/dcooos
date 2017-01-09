@@ -15,7 +15,7 @@
 					<Add option="-march=corei7" />
 					<Add option="-O2" />
 					<Add option="-m64" />
-					<Add option="-ffreestanding -c -mfpmath=sse -ggdb -save-temps" />
+					<Add option="-ffreestanding -c -mfpmath=sse -ggdb" />
 				</Compiler>
 				<Linker>
 					<Add option="-m64" />
@@ -36,19 +36,21 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="main.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="main.h" />
 		<Unit filename="serial.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stringsPrintk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="system_ll/ioport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="time.c">
 			<Option compilerVar="CC" />
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="serial.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="types.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="types.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
