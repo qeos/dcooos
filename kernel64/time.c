@@ -42,6 +42,27 @@ void getTime(){
 
 }
 
+void printk_syslog_currentTime(){
+    getTime();
+    printk_syslog("Current time is: ");
+    printk_syslog_numberInFormat(startupTime.year,'d',4);
+    printk_syslog("/");
+    printk_syslog_numberInFormat(startupTime.month,'d',2);
+    printk_syslog("/");
+    printk_syslog_numberInFormat(startupTime.day,'d',2);
+    printk_syslog(" ");
+    printk_syslog_numberInFormat(startupTime.hours,'d',2);
+    printk_syslog(":");
+    printk_syslog_numberInFormat(startupTime.minutes,'d',2);
+    printk_syslog(":");
+    printk_syslog_numberInFormat(startupTime.seconds,'d',2);
+    printk_syslog(" (");
+    printk_syslog_numberInFormat(startupTime.hi_tick,'d',2);
+    printk_syslog(", ");
+    printk_syslog_numberInFormat(startupTime.lo_tick,'d',2);
+    printk_syslog(")\n");
+}
+
 void init_time(){
 #if DEBUG_LEVEL & E_NOTICE
     printk_syslog("timer: initialization..\n");

@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1483827274 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1483923866 source:d:\work\build\os\dcooos\kernel64\main.c
+1483929231 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 
@@ -17,17 +17,17 @@
 
 1483921882 d:\work\build\os\dcooos\kernel64\stringsprintk.h
 
-1483925163 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
+1483988718 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1483923814 d:\work\build\os\dcooos\kernel64\main.h
+1483929231 d:\work\build\os\dcooos\kernel64\main.h
 
 1483929019 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1483925017 d:\work\build\os\dcooos\kernel64\time.h
+1483929231 d:\work\build\os\dcooos\kernel64\time.h
 
