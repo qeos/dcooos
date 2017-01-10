@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1483827274 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1483929231 source:d:\work\build\os\dcooos\kernel64\main.c
+1483988986 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 
@@ -24,10 +24,21 @@
 
 1483929231 d:\work\build\os\dcooos\kernel64\main.h
 
-1483929019 source:d:\work\build\os\dcooos\kernel64\time.c
+1483988751 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
 	"types.h"
 	"time.h"
 
 1483929231 d:\work\build\os\dcooos\kernel64\time.h
+
+1484008300 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+	"../types.h"
+	"../idt.h"
+
+1483990653 source:d:\work\build\os\dcooos\kernel64\strings.c
+	"types.h"
+
+1483995381 d:\work\build\os\dcooos\kernel64\idt.h
+
+1483995103 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
 

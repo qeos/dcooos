@@ -20,6 +20,8 @@ void _main(){
 
     init_time();
 
+    init_idt();
+
     while(1==1);
 
 
