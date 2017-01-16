@@ -13,8 +13,8 @@
 				<Option compiler="mingw_x64" />
 				<Compiler>
 					<Add option="-march=corei7" />
+					<Add option="-O2" />
 					<Add option="-m64" />
-					<Add option="-g" />
 					<Add option="-ffreestanding -c -mfpmath=sse -ggdb" />
 				</Compiler>
 				<Linker>

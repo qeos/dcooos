@@ -17,6 +17,7 @@ Windows enviroment:
     - GDB 7.10.1
 - CodeBlocks 16.01
 - VMWare 12.5.1
+- QEMU https://qemu.weilnetz.de/w64/
 
 not needed, but can have for some debuging processes:
 - BOCHS 2.6.8 (install in "bochs" folder, not "bochs-2.6.8")
