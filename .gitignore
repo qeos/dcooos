@@ -36,11 +36,12 @@
 *.bin
 
 # VMWare
-VMImage/dcooos.vmx.lck/*
+VMImage/*.lck/*
 VMImage/*.log
 VMImage/*.vmdk
 VMImage/*.nvram
 VMImage/*.vmsd
+VMImage/*.vmem
 VMImage/serial.out
 
 # BOCHS
