@@ -64,9 +64,6 @@ void printk_syslog_currentTime(){
 }
 
 void init_time(){
-#if DEBUG_LEVEL & E_NOTICE
-    printk_syslog("timer: initialization..\n");
-#endif // DEBUG_LEVEL
 
     getTime();
 #if DEBUG_LEVEL & E_NOTICE
@@ -74,6 +71,6 @@ void init_time(){
 #endif
 
 #if DEBUG_LEVEL & E_NOTICE
-    printk_syslog("timer: initialization done.\n");
+    printk_syslog("TIMER init done.\n");
 #endif // DEBUG_LEVEL
 }
