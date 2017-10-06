@@ -52,7 +52,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="system_ll/interrupt.s">
-			<Option compile="0" />
+			<Option weight="100" />
 		</Unit>
 		<Unit filename="system_ll/ioport.c">
 			<Option compilerVar="CC" />

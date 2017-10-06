@@ -1,0 +1,21 @@
+# Disk DescriptorFile
+version=1
+encoding="windows-1251"
+CID=fffffffe
+parentCID=ffffffff
+isNativeSnapshot="no"
+createType="monolithicFlat"
+
+# Extent description
+RW 208656 FLAT "../HDDImage/hddimage.bin" 0
+
+# The Disk Data Base 
+#DDB
+
+ddb.adapterType = "ide"
+ddb.geometry.cylinders = "207"
+ddb.geometry.heads = "16"
+ddb.geometry.sectors = "63"
+ddb.longContentID = "5c15811a16288be543cb33f1fffffffe"
+ddb.uuid = "60 00 C2 9f 35 eb e0 06-32 17 cd 5f b3 02 cf ec"
+ddb.virtualHWVersion = "12"

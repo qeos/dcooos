@@ -38,7 +38,7 @@
 # VMWare
 VMImage/*.lck/*
 VMImage/*.log
-VMImage/*.vmdk
+#VMImage/*.vmdk
 VMImage/*.nvram
 VMImage/*.vmsd
 VMImage/*.vmem
