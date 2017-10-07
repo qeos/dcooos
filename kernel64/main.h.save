@@ -1,0 +1,21 @@
+#ifndef MAIN_H_INCLUDED
+#define MAIN_H_INCLUDED
+
+// set level of debugging messages (php style)
+#define E_ERROR     1
+#define E_WARNING   2
+#define E_NOTICE    4
+#define E_ALL       E_ERROR | E_WARNING | E_NOTICE
+#define DEBUG_LEVEL E_ALL
+
+
+// HEAP
+
+#define KERNEL_HEAP         0x1000000
+#define KERNEL_HEAP_SIZE    0x2000000
+
+#define MINIMAL_MEMORY      KERNEL_HEAP+KERNEL_HEAP_SIZE
+
+#define PAGE_SIZE 0x1000
+
+#endif // MAIN_H_INCLUDED

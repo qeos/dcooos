@@ -34,6 +34,7 @@
 			<Option compilerVar="CC" />
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="heap.h" />
 		<Unit filename="idt.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
@@ -48,11 +49,14 @@
 		<Unit filename="stringsPrintk.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="system_ll/heap.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="system_ll/idt.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="system_ll/interrupt.s">
-			<Option compile="0" />
+			<Option weight="100" />
 		</Unit>
 		<Unit filename="system_ll/ioport.c">
 			<Option compilerVar="CC" />

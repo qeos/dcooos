@@ -21,6 +21,7 @@
 		</Compiler>
 		<Unit filename="bootStage0.asm">
 			<Option link="0" />
+			<Option compiler="mingw_x64" use="1" buildCommand="nasm -f bin $file -o $object.bin" />
 			<Option compiler="cygwin" use="1" buildCommand="nasm -f bin $file -o $object.bin" />
 		</Unit>
 		<Unit filename="bootStage1.asm">

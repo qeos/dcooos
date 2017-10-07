@@ -22,7 +22,13 @@ void _main(){
 
     init_idt();
 
-    while(1==1);
+    
+    
+    init_heap();
+
+    while(1==1){
+        asm("hlt");
+    };
 
 
 }

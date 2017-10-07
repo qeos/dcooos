@@ -1,44 +1,72 @@
 # depslib dependency file v1.0
-1483827274 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1507149144 source:d:\work\build\os\dcooos\kernel64\main.c
+1507400832 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 
-1483920373 d:\work\build\os\dcooos\kernel64\types.h
+1507265396 d:\work\build\os\dcooos\kernel64\types.h
 
 1483920373 d:\work\build\os\dcooos\kernel64\serial.h
 
-1483920373 source:d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
 	"../types.h"
 
-1483920373 source:d:\work\build\os\dcooos\kernel64\serial.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\serial.c
 	"types.h"
 
 1483921882 d:\work\build\os\dcooos\kernel64\stringsprintk.h
 
-1483988718 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1483929231 d:\work\build\os\dcooos\kernel64\main.h
+1507402300 d:\work\build\os\dcooos\kernel64\main.h
 
-1484008938 source:d:\work\build\os\dcooos\kernel64\time.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1483929231 d:\work\build\os\dcooos\kernel64\time.h
+1507265396 d:\work\build\os\dcooos\kernel64\time.h
 
-1484008300 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+1507399319 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
 	"../types.h"
 	"../idt.h"
 
-1483990653 source:d:\work\build\os\dcooos\kernel64\strings.c
+1507265396 source:d:\work\build\os\dcooos\kernel64\strings.c
 	"types.h"
 
-1483995381 d:\work\build\os\dcooos\kernel64\idt.h
+1507401179 d:\work\build\os\dcooos\kernel64\idt.h
 
-1507265396 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
+1507379192 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
+
+1507400153 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
+	"../main.h"
+	"../types.h"
+	"../heap.h"
+
+1507386653 d:\work\build\os\dcooos\kernel64\heap.h
+
+1507401112 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
+	"../types.h"
+	"../main.h"
+
+1507401136 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_tree.c
+	"../types.h"
+	"../main.h"
+	"../heap.h"
+	"../idt.h"
+
+1507402162 source:d:\work\build\os\dcooos\kernel64\task.c
+
+1507404016 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+	"../types.h"
+	"../main.h"
+	"../idt.h"
+	"../task.h"
+	"../heap.h"
+
+1507403840 d:\work\build\os\dcooos\kernel64\task.h
 

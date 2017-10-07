@@ -22,7 +22,11 @@ void _main(){
 
     init_idt();
 
-    while(1==1);
+    init_paging();
+
+    init_heap();
+
+    HLT;
 
 
 }

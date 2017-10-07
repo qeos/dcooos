@@ -1,0 +1,96 @@
+#include "../types.h"
+#include "../main.h"
+
+#define HAA_STATE_FREE 0x00
+#define HAA_STATE_TABLE 0x01
+#define HAA_STATE_USED 0xff
+
+#define HAA_BLOCK_SIZE 0x100
+
+typedef struct{
+    u8 state;
+    u8 size;
+    u8 main_ptr;
+    u8 reserved;
+} __attribute__((packed)) t_HAA_heap_rec;
+
+u8 HAA_table_size;
+u8 HAA_free_heap;
+u1 HAA_heap_initialized = 0;
+
+t_HAA_heap_rec *HAA_table = KERNEL_HEAP;
+
+void HAA_mark_record(u8 ptr, u8 size, u1 state){
+    u8 spos = (ptr - KERNEL_HEAP) / HAA_BLOCK_SIZE;
+    u8 dpos = spos + (size / HAA_BLOCK_SIZE);
+    if(size % HAA_BLOCK_SIZE != 0){
+        dpos++;
+    }
+    u8 ipos;
+    for(ipos = spos; ipos < dpos; ipos++){
+        HAA_table[ipos].state = state;
+        HAA_table[ipos].size = size;
+        HAA_table[ipos].main_ptr = ptr;
+        HAA_table[ipos].reserved = KERNEL_HEAP + ipos * HAA_BLOCK_SIZE;
+    }
+    if(state == HAA_STATE_FREE){
+        HAA_free_heap += (dpos - spos) * HAA_BLOCK_SIZE;
+    }else{
+        HAA_free_heap -= (dpos - spos) * HAA_BLOCK_SIZE;
+    }
+}
+
+u8 HAA_kmalloc(u8 len){
+    u8 ipos;
+    u8 needBlocks = len / HAA_BLOCK_SIZE;
+    if(len % HAA_BLOCK_SIZE != 0){
+        needBlocks++;
+    }
+    u8 iipos;
+    u8 canUse;
+    for(ipos = 0; ipos<=KERNEL_HEAP_SIZE/HAA_BLOCK_SIZE; ipos++){
+        if(HAA_table[ipos].state == HAA_STATE_FREE){
+            u8 ptr = KERNEL_HEAP + ipos * HAA_BLOCK_SIZE;
+            canUse = -1;
+            iipos = needBlocks;
+            while((iipos > 0) && (canUse == -1)){
+                if(HAA_table[ipos+iipos-1].state != HAA_STATE_FREE){
+                    canUse = 0;
+                }
+                iipos--;
+            }
+            if(canUse == -1){
+                HAA_mark_record(ptr, len, HAA_STATE_USED);
+                return ptr;
+            }
+        }
+    }
+
+    printk_syslog("NO FREE HEAP");
+    while(1){
+        asm("hlt");
+    };
+}
+
+void HAA_kfree(u8 ptr){
+    u8 ipos = (ptr - KERNEL_HEAP) / HAA_BLOCK_SIZE;
+    HAA_mark_record(ptr, HAA_table[ipos].size, HAA_STATE_FREE);
+}
+
+void HAA_heap_print(){
+    
+u8 HAA_get_free_heap_size(){
+    return HAA_free_heap;
+}
+
+void HAA_init_heap(){
+    HAA_heap_initialized = 0;
+
+    HAA_free_heap = KERNEL_HEAP_SIZE;
+    HAA_table_size = KERNEL_HEAP_SIZE/HAA_BLOCK_SIZE * sizeof(t_HAA_heap_rec);
+    HAA_mark_record(KERNEL_HEAP, HAA_table_size, HAA_STATE_TABLE);
+    HAA_mark_record(KERNEL_HEAP+HAA_table_size, KERNEL_HEAP_SIZE-HAA_table_size, HAA_STATE_FREE);
+
+    HAA_heap_initialized = -1;
+
+}
