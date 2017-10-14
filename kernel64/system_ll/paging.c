@@ -4,7 +4,7 @@
 #include "../task.h"
 #include "../heap.h"
 
-u4 kernel_size;
+u8 kernel_size;
 
 #define PAGING_SPACE 0x10000000
 
@@ -276,7 +276,7 @@ void make_user_area(u8 *pdir, u8 user_space_addr, u8 user_space_size){
         }
         ptab = pdir[pdi] & 0xfffffc00;
         pti = (user_space_addr/PAGE_SIZE + i) & 0x3ff;
-        ptab[pti] = (((u4)get_free_page(pdir,0)) & 0xfffffc00) | PTE_PRESENT;
+        ptab[pti] = (((u8)get_free_page(pdir,0)) & 0xfffffc00) | PTE_PRESENT;
     }
 }
 
@@ -286,12 +286,33 @@ u8 *make_user_pd(){
     return pdir;
 }
 
+u8 t_PDPE __attribute__((aligned(64)));
+u8 t_PDE __attribute__((aligned(64)));
+
+void init_paging_preinit(){
+
+    t_PDPE = (((u8)&t_PDE)) | PE_PRESENT | PE_WRITABLE;
+    t_PDE = PE_PRESENT | PE_WRITABLE;
+
+    // PAE bit enable
+    asm("movq %cr4, %rax\n\t"
+        "orl $0x20, %eax\n\t"
+        "movq %rax, %cr4");
+    asm("movq %0, %%cr3" :: "r" (((u8)&t_PDPE)|1));
+    asm("movq %cr0, %rax\n\t"
+        "orl $0x80000000, %eax\n\t"
+        "movq %rax, %cr0");
+
+    printk_syslog("PADING preinit: done.\n");
+
+}
+
 void init_paging(){
 
     register_interrupt_handler(14, &paging_callback);
 
     // create memory table
-    u4 size_pd = 0xffffffff/PAGE_SIZE+1;
+    u8 size_pd = 0xffffffff/PAGE_SIZE+1;
     memorymap = (memrec_t*)kmalloc(sizeof(memrec_t)*size_pd);
     memset(*memorymap, 0, sizeof(memrec_t)*size_pd);
 

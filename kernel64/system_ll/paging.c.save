@@ -1,9 +1,10 @@
 #include "../types.h"
 #include "../main.h"
 #include "../idt.h"
+#include "../task.h"
 #include "../heap.h"
 
-u4 kernel_size;
+u8 kernel_size;
 
 #define PAGING_SPACE 0x10000000
 
@@ -68,7 +69,7 @@ void mark_memory_page(u8 *pdir, u8 paddr_index, u1 state){
 }
 
 u8 *copy_pdir(){
-    //u8 *current_pdir = current_task->pdir;
+    u8 *current_pdir = current_task->pdir;
 
     // make page directory for owner PD
     u8 dst_pdir_index = get_free_page_notmarked(current_pdir,0);
@@ -90,11 +91,11 @@ u8 *copy_pdir(){
 
 void paging_callback(registers_t *reg){
     u8 cr2, cr3;
-    asm("movl %%cr2, %0":"=r"(cr2));    // access address / page fault linear address
-    asm("movl %%cr3, %0":"=r"(cr3));    // page directory
+    asm("movq %%cr2, %0":"=r"(cr2));    // access address / page fault linear address
+    asm("movq %%cr3, %0":"=r"(cr3));    // page directory
 
     // switch to kernel PD
-    asm("movl %0, %%cr3" :: "r" (tasks->pdir));
+    asm("movq %0, %%cr3" :: "r" (tasks->pdir));
 
     if((cr2 < maxmem) && (memorymap[cr2/PAGE_SIZE].state == PS_FREE)){
         make_physical(cr3, cr2, cr2, PS_USED);
@@ -105,7 +106,7 @@ void paging_callback(registers_t *reg){
         u8 phisical = get_free_page(cr3,0);
     }
     // switch back to fault PD
-    asm("movl %0, %%cr3" :: "r" (cr3));
+    asm("movq %0, %%cr3" :: "r" (cr3));
     return;
 
 }
@@ -285,15 +286,34 @@ u8 *make_user_pd(){
     return pdir;
 }
 
+u8 t_PDPE __attribute__((aligned(64)));
+u8 t_PDE __attribute__((aligned(64)));
+
+void init_paging_preinit(){
+
+    t_PDPE = (((u8)&t_PDE)) | PE_PRESENT | PE_WRITABLE;
+    t_PDE = PE_PRESENT | PE_WRITABLE;
+
+    // PAE bit enable
+    asm("movq %cr4, %rax\n\t"
+        "orl $0x20, %eax\n\t"
+        "movq %rax, %cr4");
+    asm("movq %0, %%cr3" :: "r" (((u8)&t_PDPE)|1));
+    asm("movq %cr0, %rax\n\t"
+        "orl $0x80000000, %eax\n\t"
+        "movq %rax, %cr0");
+
+    printk_syslog("PADING preinit: done.\n");
+
+}
+
 void init_paging(){
 
     register_interrupt_handler(14, &paging_callback);
 
     // create memory table
     u4 size_pd = 0xffffffff/PAGE_SIZE+1;
-    //memorymap = (memrec_t*)kmalloc(sizeof(memrec_t)*(maxmem/PAGE_SIZE));
     memorymap = (memrec_t*)kmalloc(sizeof(memrec_t)*size_pd);
-    //memset(*memorymap, 0, sizeof(memrec_t)*(maxmem/PAGE_SIZE));
     memset(*memorymap, 0, sizeof(memrec_t)*size_pd);
 
     // set all memory as flat for kernal
@@ -327,12 +347,12 @@ void init_paging(){
     for(i=KERNEL_PT/PAGE_SIZE; i<KERNEL_PT/PAGE_SIZE+ptab_size; i++) memorymap[i].state = PS_KERNEL;
 
     // set video memory
-    make_physical(KERNEL_PD, init_data.vba_lfb_address, init_data.vba_lfb_address, PS_VIDEO);
+    //make_physical(KERNEL_PD, init_data.vba_lfb_address, init_data.vba_lfb_address, PS_VIDEO);
 
-    asm("movl %0, %%cr3" :: "r" (KERNEL_PD));
-    asm("movl %cr0, %eax\n\t"
+    asm("movq %0, %%cr3" :: "r" ((u8)KERNEL_PD));
+    asm("movq %cr0, %rax\n\t"
         "orl $0x80000000, %eax\n\t"
-        "movl %eax, %cr0");
+        "movq %rax, %cr0");
 
-    printk_bochs("\rPAGING init: done.\n");
+    printk_syslog("PAGING init: done.\n");
 }

@@ -129,7 +129,7 @@ static void HAT_join_free(){
 
 u8 HAT_get_free_heap_size(){
     t_HAT_heap_rec *rec = (t_HAT_heap_rec*)(KERNEL_HEAP);
-    u4 size = 0;
+    u8 size = 0;
     while ((u8)rec < KERNEL_HEAP+KERNEL_HEAP_SIZE){
         if(rec->state == HEAP_STATE_FREE)
             size += rec->size;

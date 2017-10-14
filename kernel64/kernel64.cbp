@@ -52,6 +52,12 @@
 		<Unit filename="system_ll/heap.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="system_ll/heap_as_array.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="system_ll/heap_as_tree.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="system_ll/idt.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -61,6 +67,13 @@
 		<Unit filename="system_ll/ioport.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="system_ll/paging.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="task.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="task.h" />
 		<Unit filename="time.c">
 			<Option compilerVar="CC" />
 		</Unit>

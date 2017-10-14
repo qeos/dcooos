@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1507400832 source:d:\work\build\os\dcooos\kernel64\main.c
+1507972271 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 
@@ -42,18 +42,18 @@
 
 1507379192 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
 
-1507400153 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
+1507929170 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
 	"../main.h"
 	"../types.h"
 	"../heap.h"
 
-1507386653 d:\work\build\os\dcooos\kernel64\heap.h
+1507927812 d:\work\build\os\dcooos\kernel64\heap.h
 
 1507401112 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
 	"../types.h"
 	"../main.h"
 
-1507401136 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_tree.c
+1507928629 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_tree.c
 	"../types.h"
 	"../main.h"
 	"../heap.h"
@@ -61,7 +61,7 @@
 
 1507402162 source:d:\work\build\os\dcooos\kernel64\task.c
 
-1507404016 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+1507928675 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
 	"../types.h"
 	"../main.h"
 	"../idt.h"

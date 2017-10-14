@@ -1,14 +1,25 @@
 #include "main.h"
 #include "types.h"
 
-u1 bootDevice;
+typedef struct{
+    u4 bootDrive;
+    u4 memorySize;
+} __attribute__((packed)) t_parametresHW;
+
+t_parametresHW *parametresHW;
+
+extern maxmem;
 
 void _main(){
     // *********************************************************************
     // INITIALIZATION
     // *********************************************************************
 
-    asm("movb %%dl, %0":"=r"(bootDevice));
+    u8 p;
+    asm("movl %%ebx, %0":"=m"(p));
+    parametresHW = (t_parametresHW *)p;
+    maxmem = parametresHW->memorySize;
+    maxmem = maxmem*64+17472; // don`t know why
 
     // init serial
     init_serial();
@@ -16,15 +27,18 @@ void _main(){
 #if DEBUG_LEVEL & E_NOTICE
     printk_syslog("--------------------------------------------------------------------------\n");
     printk_syslog("System boot up...\n\n");
+    printk_syslog("Memory size: ");
+    printk_syslog_number(maxmem/1024, 'd');
+    printk_syslog("Mb\n");
 #endif // DEBUG_LEVEL
 
     init_time();
 
     init_idt();
 
-    init_paging();
-
     init_heap();
+
+    init_paging();
 
     HLT;
 

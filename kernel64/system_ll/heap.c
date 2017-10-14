@@ -3,6 +3,7 @@
 #include "../heap.h"
 
 u8 get_max_mem(){
+
     u8 *mem;
     u8 index = MINIMAL_MEMORY;
     while(1){
@@ -75,9 +76,9 @@ void heap_init(){
 
 void init_heap(){
 
-    maxmem = get_max_mem();
+//    maxmem = get_max_mem();
 
-    init_heap();
+    heap_init();
 
     printk_syslog("Found ");
     printk_syslog_number(maxmem/1024/1024, 'd');

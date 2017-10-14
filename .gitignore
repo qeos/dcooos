@@ -54,4 +54,6 @@ kernel64/*.s
 *.map
 *.zip
 
+# codeblocks files
+*.save
 
