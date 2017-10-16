@@ -4,8 +4,6 @@
 #include "../task.h"
 #include "../heap.h"
 
-u8 kernel_size;
-
 #define PAGING_SPACE 0x10000000
 
 struct memrec{
@@ -14,6 +12,7 @@ struct memrec{
 } __attribute__((packed));
 typedef struct memrec memrec_t;
 
+u1 paging_initialized = 0;
 memrec_t *memorymap;
 
 u8 *get_free_page_notmarked(u8 *pdir, u8 init_addr){
@@ -90,6 +89,7 @@ u8 *copy_pdir(){
 }
 
 void paging_callback(registers_t *reg){
+
     u8 cr2, cr3;
     asm("movq %%cr2, %0":"=r"(cr2));    // access address / page fault linear address
     asm("movq %%cr3, %0":"=r"(cr3));    // page directory
@@ -276,7 +276,7 @@ void make_user_area(u8 *pdir, u8 user_space_addr, u8 user_space_size){
         }
         ptab = pdir[pdi] & 0xfffffc00;
         pti = (user_space_addr/PAGE_SIZE + i) & 0x3ff;
-        ptab[pti] = (((u4)get_free_page(pdir,0)) & 0xfffffc00) | PTE_PRESENT;
+        ptab[pti] = (((u8)get_free_page(pdir,0)) & 0xfffffc00) | PTE_PRESENT;
     }
 }
 
@@ -289,46 +289,33 @@ u8 *make_user_pd(){
 u8 t_PDPE __attribute__((aligned(64)));
 u8 t_PDE __attribute__((aligned(64)));
 
-void init_paging_preinit(){
-
-    t_PDPE = (((u8)&t_PDE)) | PE_PRESENT | PE_WRITABLE;
-    t_PDE = PE_PRESENT | PE_WRITABLE;
-
-    // PAE bit enable
-    asm("movq %cr4, %rax\n\t"
-        "orl $0x20, %eax\n\t"
-        "movq %rax, %cr4");
-    asm("movq %0, %%cr3" :: "r" (((u8)&t_PDPE)|1));
-    asm("movq %cr0, %rax\n\t"
-        "orl $0x80000000, %eax\n\t"
-        "movq %rax, %cr0");
-
-    printk_syslog("PADING preinit: done.\n");
-
-}
-
 void init_paging(){
 
     register_interrupt_handler(14, &paging_callback);
 
+#ifdef HEAP_MOD_HAA
+    memset(KERNEL_HEAP, 0, KERNEL_HEAP_SIZE/0x1000);
+#endif // HEAP_MOD_HAA
+
     // create memory table
-    u4 size_pd = 0xffffffff/PAGE_SIZE+1;
+    u8 size_pd = maxmem/PAGE_SIZE+1;
     memorymap = (memrec_t*)kmalloc(sizeof(memrec_t)*size_pd);
-    memset(*memorymap, 0, sizeof(memrec_t)*size_pd);
+    memset(memorymap, 0, sizeof(memrec_t)*size_pd);
 
     // set all memory as flat for kernal
     u8 i, j;
     u8 line_addr = 0;
-    u8 *pdir = (u8*)KERNEL_PD;
-    u8 *ptab = (u8*)KERNEL_PT;
+    u8 *pml4e = (u8*)KERNEL_PML4E;
+    u8 *pdpe = (u8*)KERNEL_PDPE;
+    u8 *pde = (u8*)KERNEL_PDE;
     memset(pdir, 0, 0x1000);
     u8 ptab_size = 0;
     while(line_addr < maxmem){
         ptab_size++;
         u8 page_index = line_addr >> 22;
-        pdir[page_index] = (u8*)((u8)ptab & 0xfffffc00 | PE_PRESENT | PE_WRITABLE);
+        pdir[page_index] = (u8*)((u8)ptab & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
         for(j=0; j<PAGE_SIZE/4; j++){
-            ptab[j] = (u8*)((u8)line_addr & 0xfffffc00 | PE_PRESENT | PE_WRITABLE);
+            ptab[j] = (u8*)((u8)line_addr & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
             mark_memory_page(pdir, line_addr/PAGE_SIZE, PS_FREE);
             line_addr = line_addr + PAGE_SIZE;
         }
@@ -353,6 +340,8 @@ void init_paging(){
     asm("movq %cr0, %rax\n\t"
         "orl $0x80000000, %eax\n\t"
         "movq %rax, %cr0");
+
+    paging_initialized = -1;
 
     printk_syslog("PAGING init: done.\n");
 }

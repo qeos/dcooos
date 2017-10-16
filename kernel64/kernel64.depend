@@ -1,9 +1,10 @@
 # depslib dependency file v1.0
 1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1507972271 source:d:\work\build\os\dcooos\kernel64\main.c
+1508102774 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
+	"heap.h"
 
 1507265396 d:\work\build\os\dcooos\kernel64\types.h
 
@@ -17,12 +18,12 @@
 
 1483921882 d:\work\build\os\dcooos\kernel64\stringsprintk.h
 
-1507265396 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
+1508078477 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1507402300 d:\work\build\os\dcooos\kernel64\main.h
+1508184118 d:\work\build\os\dcooos\kernel64\main.h
 
 1507265396 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
@@ -31,25 +32,26 @@
 
 1507265396 d:\work\build\os\dcooos\kernel64\time.h
 
-1507399319 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+1508087212 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
 	"../types.h"
 	"../idt.h"
+	"../main.h"
 
 1507265396 source:d:\work\build\os\dcooos\kernel64\strings.c
 	"types.h"
 
 1507401179 d:\work\build\os\dcooos\kernel64\idt.h
 
-1507379192 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
+1508010109 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
 
-1507929170 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
+1508080389 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
 	"../main.h"
 	"../types.h"
 	"../heap.h"
 
 1507927812 d:\work\build\os\dcooos\kernel64\heap.h
 
-1507401112 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
+1508179030 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
 	"../types.h"
 	"../main.h"
 
@@ -61,7 +63,7 @@
 
 1507402162 source:d:\work\build\os\dcooos\kernel64\task.c
 
-1507928675 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+1508183399 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
 	"../types.h"
 	"../main.h"
 	"../idt.h"

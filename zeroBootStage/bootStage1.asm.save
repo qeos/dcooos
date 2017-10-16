@@ -269,6 +269,9 @@ nearJump:
 ; -------------------------------------------------------
 ; prepare paging     2-Mbyte Page Translation—Long Mode
 ; -------------------------------------------------------
+
+; we need prepare size: MINIMAL_MEMORY = KERNEL_HEAP+KERNEL_HEAP_SIZE
+
     ; set PML4E
     mov edi, 0x1000
     mov cr3, edi
@@ -286,18 +289,22 @@ nearJump:
     mov DWORD [edi], 0x3003      ; Set the uint32_t at the destination index to 0x3003.
     add edi, 0x1000              ; Add 0x1000 to the destination index.
     ; PDE
-    mov DWORD [edi], 0x4003      ; Set the uint32_t at the destination index to 0x4003.
-    ;add edi, 0x1000              ; Add 0x1000 to the destination index.
+;    mov DWORD [edi], 0x4003      ; Set the uint32_t at the destination index to 0x4003.
+;
 ;    add edi, 8
-;    mov DWORD [edi], 0x5003      ; Set the uint32_t at the destination index to 0x4003.
-    add edi, 0x1000              ; Add 0x1000 to the destination index.
+;    mov DWORD [edi], 0x5003
+;    add edi, 8
+;    mov DWORD [edi], 0x6003
+;    sub edi, 8
+;
+;    add edi, 0x1000              ; Add 0x1000 to the destination index.
 
     mov ebx, 0x00000083          ; Set the B-register to 0x00000003.
-    mov ecx, 512                 ; Set the C-register to 512.
+    mov ecx, 128                 ; Set the C-register to 512.
 
 .SetEntry:
     mov DWORD [edi], ebx         ; Set the uint32_t at the destination index to the B-register.
-    add ebx, 0x1000              ; Add 0x1000 to the B-register.
+    add ebx, 0x200000              ; Add 0x1000 to the B-register. because we use 2Mb pages
     add edi, 8                   ; Add eight to the destination index.
     loop .SetEntry               ; Set the next entry.
 
@@ -326,9 +333,9 @@ nearJump:
     or eax, 1 << 8
     wrmsr
 
-; PAE
+; PAE & PSE
     mov eax, cr4
-    or ax, 1 << 5
+    or ax, 1 << 5 | 1 << 4
     mov cr4, eax
 
 ; paging and protect

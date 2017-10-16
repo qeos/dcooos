@@ -1,5 +1,6 @@
 #include "../types.h"
 #include "../idt.h"
+#include "../main.h"
 
 typedef u8(*call_t)(registers_t*);
 
@@ -84,6 +85,9 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
+extern void isr_common_stub();
+extern void irq_common_stub();
+
 // ******************************************************************************************************************************
 
 void register_interrupt_handler(u1 n, call_t handler)
@@ -95,7 +99,7 @@ void register_interrupt_handler(u1 n, call_t handler)
 void isr_handler(registers_t regs)
 {
 #if DEBUG_LEVEL & E_NOTICE
-    printk_syslog("call interrupt: 0x");
+    printk_syslog("isr interrupt: 0x");
     printk_syslog_number(regs.int_no,'h');
     printk_syslog("\n");
 #endif // DEBUG_LEVEL
@@ -114,7 +118,7 @@ void isr_handler(registers_t regs)
         printk_syslog("unhandled interrupt: 0x");
         printk_syslog_number(int_no,'h');
         printk_syslog("\n");
-       for(;;);
+        HLT;
     }
 }
 
@@ -123,7 +127,7 @@ void irq_handler(registers_t regs)
 {
 #if DEBUG_LEVEL & E_NOTICE
     if (regs.int_no != 32){
-        printk_syslog("interrupt: 0x");
+        printk_syslog("irq interrupt: 0x");
         printk_syslog_number(regs.int_no,'h');
         printk_syslog("\n");
     }

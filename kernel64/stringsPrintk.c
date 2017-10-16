@@ -4,10 +4,15 @@
 
 void printk_syslog(u1 *text){
     int i=0;
+    u8 j=0;
 
     while(text[i] != 0){
         serial_out(text[i]);
         i++;
+        // need pause for com buffers to be free
+        for(j=0;j<1000;j++){
+            asm("nop");
+        }
     }
 
 }

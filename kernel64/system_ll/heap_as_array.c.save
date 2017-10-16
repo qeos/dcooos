@@ -67,9 +67,7 @@ u8 HAA_kmalloc(u8 len){
     }
 
     printk_syslog("NO FREE HEAP");
-    while(1){
-        asm("hlt");
-    };
+    HLT;
 }
 
 void HAA_kfree(u8 ptr){
@@ -78,7 +76,8 @@ void HAA_kfree(u8 ptr){
 }
 
 void HAA_heap_print(){
-    
+}
+
 u8 HAA_get_free_heap_size(){
     return HAA_free_heap;
 }

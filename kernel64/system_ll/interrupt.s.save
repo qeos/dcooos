@@ -17,7 +17,7 @@
 %macro ISR_NOERRCODE_DEBUG 1
   global isr%1
   isr%1:
-    xchg bx,bx
+;    xchg bx,bx
     cli                         ; Disable interrupts firstly.
     push byte 0                 ; Push a dummy error code.
     push %1                ; Push the interrupt number.
@@ -37,7 +37,7 @@
 %macro ISR_ERRCODE_DEBUG 1
   global isr%1
   isr%1:
-    xchg bx,bx
+;    xchg bx,bx
     cli                         ; Disable interrupts.
     push %1                ; Push the interrupt number
     jmp isr_common_stub
@@ -130,6 +130,7 @@ isr_common_stub:
     mov gs, ax
 
     sti
+    mov rcx, 
     call isr_handler
     cli
 
