@@ -19,8 +19,6 @@
 #define PAGE_SIZE 0x200000
 
 #define KERNEL_PML4E    0x200000
-#define KERNEL_PDPE     0x201000
-#define KERNEL_PDE      0x202000
 
 #define PS_NULL     0x00    // can use for any
 #define PS_FREE     0x01    // can use for any

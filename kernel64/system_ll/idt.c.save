@@ -166,6 +166,9 @@ static void idt_flush(u8 idr_ptr){
     asm("lidt %0" :: "m" (idt_ptr));
 }
 
+void timer_callback(registers_t *regs){
+}
+
 void init_idt(){
     // strange, but 'packet' not worked as we need
     idt_ptr.limit = (sizeof(idt_entry_t) * 256 -1) + (((u8)&idt_entries)<<16);
@@ -274,6 +277,8 @@ void init_idt(){
 
     idt_flush((u8)&idt_ptr);
     asm("sti");
+    
+    register_interrupt_handler(32, timer_callback)
 
     printk_syslog("IDT init done.\n");
 

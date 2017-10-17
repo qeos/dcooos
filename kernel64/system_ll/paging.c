@@ -115,15 +115,36 @@ void make_physical(u8 *pdir, u8 log_addr, u8 phys_addr, u1 need_markup){
     if (need_markup != 0){
         mark_memory_page(pdir, phys_addr/PAGE_SIZE, need_markup);
     }
-    u8 *ptab;
-    if (pdir[(log_addr >> 22)] == 0){
-        // if absentee then create element in
-        ptab = get_free_page(pdir, KERNEL_PT);
-        pdir[(log_addr >> 22)] = (u8*)(((u8)ptab & 0xfffffc00) | PE_PRESENT | PE_WRITABLE);
-    }else{
-        ptab = (u8*)(pdir[(log_addr >> 22)] & 0xfffffc00);
+
+    u8 PML4E_index = log_addr >> 39 & 0x1ff;
+    if(pdir[PML4E_index] == 0){
+        u8 page_free = get_free_page(pdir, KERNEL_PML4E);
+        pdir[PML4E_index] = page_free & 0xfffffffffffffc00 | 0x03;
     }
-    ptab[(log_addr >> 12) & 0x3ff] = (phys_addr & 0xfffffc00) | PE_PRESENT | PE_WRITABLE;
+
+    u8 PDPE_index = log_addr >> 30 & 0x1ff;
+    u8 *pdpe = (u8*)(pdir[PML4E_index] & 0xfffffffffffffc00);
+    if(pdpe[PDPE_index] == 0){
+        u8 page_free = get_free_page(pdir, KERNEL_PML4E);
+        pdpe[PDPE_index] = page_free & 0xfffffffffffffc00 | 0x03;
+    }
+
+    u8 PDE_index = log_addr >> 21 & 0x1ff;
+    u8 *pde = (u8*)(pdpe[PDPE_index] & 0xfffffffffffffc00);
+    //if(pde[PDE_index] == 0){
+        pde[PDE_index] = phys_addr & 0xfffffffffffffc00 | 0x83;
+    //}
+
+
+//    u8 *ptab;
+//    if (pdir[(log_addr >> 22)] == 0){
+//        // if absentee then create element in
+//        ptab = get_free_page(pdir, KERNEL_PT);
+//        pdir[(log_addr >> 22)] = (u8*)(((u8)ptab & 0xfffffc00) | PE_PRESENT | PE_WRITABLE);
+//    }else{
+//        ptab = (u8*)(pdir[(log_addr >> 22)] & 0xfffffc00);
+//    }
+//    ptab[(log_addr >> 12) & 0x3ff] = (phys_addr & 0xfffffc00) | PE_PRESENT | PE_WRITABLE;
 
 }
 
@@ -306,20 +327,37 @@ void init_paging(){
     u8 i, j;
     u8 line_addr = 0;
     u8 *pml4e = (u8*)KERNEL_PML4E;
-    u8 *pdpe = (u8*)KERNEL_PDPE;
-    u8 *pde = (u8*)KERNEL_PDE;
-    memset(pdir, 0, 0x1000);
-    u8 ptab_size = 0;
+    memset(pml4e, 0, 0x1000);
+    u8 freeblock = 0;
     while(line_addr < maxmem){
-        ptab_size++;
-        u8 page_index = line_addr >> 22;
-        pdir[page_index] = (u8*)((u8)ptab & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
-        for(j=0; j<PAGE_SIZE/4; j++){
-            ptab[j] = (u8*)((u8)line_addr & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
-            mark_memory_page(pdir, line_addr/PAGE_SIZE, PS_FREE);
-            line_addr = line_addr + PAGE_SIZE;
+        u8 PML4E_index = line_addr >> 39 & 0x1ff;
+        if(pml4e[PML4E_index] == 0){
+            freeblock++;
+            pml4e[PML4E_index] = (KERNEL_PML4E+freeblock*0x1000) & 0xfffffffffffffc00 | 0x03;
         }
-        ptab=(u8*)((u8)ptab + PAGE_SIZE);
+
+        u8 PDPE_index = line_addr >> 30 & 0x1ff;
+        u8 *pdpe = (u8*)(pml4e[PML4E_index] & 0xfffffffffffffc00);
+        if(pdpe[PDPE_index] == 0){
+            freeblock++;
+            pdpe[PDPE_index] = (KERNEL_PML4E+freeblock*0x1000) & 0xfffffffffffffc00 | 0x03;
+        }
+
+        u8 PDE_index = line_addr >> 21 & 0x1ff;
+        u8 *pde = (u8*)(pdpe[PDPE_index] & 0xfffffffffffffc00);
+        if(pde[PDE_index] == 0){
+            pde[PDE_index] = line_addr & 0xfffffffffffffc00 | 0x83;
+        }
+
+        line_addr += PAGE_SIZE;
+
+//        pml4e[PDPE_index] = (u8*)((u8)ptab & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
+//        for(j=0; j<PAGE_SIZE/4; j++){
+//            ptab[j] = (u8*)((u8)line_addr & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
+//            mark_memory_page(pdir, line_addr/PAGE_SIZE, PS_FREE);
+//            line_addr = line_addr + PAGE_SIZE;
+//        }
+//        ptab=(u8*)((u8)ptab + PAGE_SIZE);
     }
 
     // low mem (00000000 - 000d0000)
@@ -328,15 +366,13 @@ void init_paging(){
     for(i=0xd0000/PAGE_SIZE; i<0x100000/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
     // heap (01000000 - 02000000)
     for(i=KERNEL_HEAP/PAGE_SIZE; i<(KERNEL_HEAP+KERNEL_HEAP_SIZE)/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
-    // page directory (00200000 - 00201000)
-    for(i=KERNEL_PD/PAGE_SIZE; i<KERNEL_PD/PAGE_SIZE+1; i++) memorymap[i].state = PS_KERNEL;
-    // page table (00201000 - 00601000)
-    for(i=KERNEL_PT/PAGE_SIZE; i<KERNEL_PT/PAGE_SIZE+ptab_size; i++) memorymap[i].state = PS_KERNEL;
+    // page directory (00200000 - freeblock)
+    for(i=KERNEL_PML4E/PAGE_SIZE; i<KERNEL_PML4E/PAGE_SIZE+freeblock; i++) memorymap[i].state = PS_KERNEL;
 
     // set video memory
     //make_physical(KERNEL_PD, init_data.vba_lfb_address, init_data.vba_lfb_address, PS_VIDEO);
 
-    asm("movq %0, %%cr3" :: "r" ((u8)KERNEL_PD));
+    asm("movq %0, %%cr3" :: "r" ((u8)KERNEL_PML4E));
     asm("movq %cr0, %rax\n\t"
         "orl $0x80000000, %eax\n\t"
         "movq %rax, %cr0");

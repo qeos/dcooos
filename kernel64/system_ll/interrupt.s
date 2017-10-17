@@ -71,7 +71,7 @@ ISR_ERRCODE   13
 ISR_ERRCODE   14
 ISR_NOERRCODE 15
 ISR_NOERRCODE 16
-ISR_NOERRCODE 17
+ISR_ERRCODE 17      ; by SDM
 ISR_NOERRCODE 18
 ISR_NOERRCODE 19
 ISR_NOERRCODE 20
@@ -148,9 +148,9 @@ isr_common_stub:
     pop rbp
     pop rsi
     pop rdi
-    add rsp, 8     ; Cleans up the pushed error code and pushed ISR number
+    add rsp, 0x10     ; Cleans up the pushed error code and pushed ISR number
     sti
-    iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+    iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
 ; In isr.c
 extern irq_handler
@@ -178,6 +178,7 @@ irq_common_stub:
     mov gs, ax
 
     sti
+    mov rcx, rsp
     call irq_handler
     cli
 
@@ -195,9 +196,9 @@ irq_common_stub:
     pop rbp
     pop rsi
     pop rdi
-    add rsp, 8     ; Cleans up the pushed error code and pushed ISR number
+    add rsp, 0x10     ; Cleans up the pushed error code and pushed ISR number
     sti
-    iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+    iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
 
 [GLOBAL _read_eip]

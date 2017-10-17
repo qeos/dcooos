@@ -23,7 +23,7 @@
 	"types.h"
 	"time.h"
 
-1508184118 d:\work\build\os\dcooos\kernel64\main.h
+1508188449 d:\work\build\os\dcooos\kernel64\main.h
 
 1507265396 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
@@ -32,7 +32,7 @@
 
 1507265396 d:\work\build\os\dcooos\kernel64\time.h
 
-1508087212 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+1508264403 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
 	"../types.h"
 	"../idt.h"
 	"../main.h"
@@ -42,7 +42,7 @@
 
 1507401179 d:\work\build\os\dcooos\kernel64\idt.h
 
-1508010109 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
+1508264660 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
 
 1508080389 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
 	"../main.h"
@@ -61,9 +61,9 @@
 	"../heap.h"
 	"../idt.h"
 
-1507402162 source:d:\work\build\os\dcooos\kernel64\task.c
+1508262323 source:d:\work\build\os\dcooos\kernel64\task.c
 
-1508183399 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+1508264917 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
 	"../types.h"
 	"../main.h"
 	"../idt.h"

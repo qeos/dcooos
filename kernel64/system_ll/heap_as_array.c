@@ -85,10 +85,10 @@ u8 HAA_get_free_heap_size(){
 void HAA_init_heap(){
     HAA_heap_initialized = 0;
 
-    HAA_free_heap = KERNEL_HEAP_SIZE;
     HAA_table_size = KERNEL_HEAP_SIZE/HAA_BLOCK_SIZE * sizeof(t_HAA_heap_rec);
     HAA_mark_record(KERNEL_HEAP, HAA_table_size, HAA_STATE_TABLE);
-    HAA_mark_record(KERNEL_HEAP+HAA_table_size, KERNEL_HEAP_SIZE-HAA_table_size, HAA_STATE_FREE);
+    HAA_free_heap = KERNEL_HEAP_SIZE-HAA_table_size;
+    HAA_mark_record(KERNEL_HEAP+HAA_table_size, HAA_free_heap, HAA_STATE_FREE);
 
     HAA_heap_initialized = -1;
 

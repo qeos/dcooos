@@ -300,7 +300,7 @@ nearJump:
 ;    add edi, 0x1000              ; Add 0x1000 to the destination index.
 
     mov ebx, 0x00000083          ; Set the B-register to 0x00000003.
-    mov ecx, 128                 ; Set the C-register to 512.
+    mov ecx, 512                 ; Set the C-register to 512.
 
 .SetEntry:
     mov DWORD [edi], ebx         ; Set the uint32_t at the destination index to the B-register.
