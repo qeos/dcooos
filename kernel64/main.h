@@ -1,6 +1,9 @@
 #ifndef MAIN_H_INCLUDED
 #define MAIN_H_INCLUDED
 
+#define true 1
+#define false 0
+
 // set level of debugging messages (php style)
 #define E_ERROR     1
 #define E_WARNING   2

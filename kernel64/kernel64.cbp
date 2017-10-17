@@ -34,6 +34,15 @@
 			<Option compilerVar="CC" />
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="drivers/hdd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="drivers/l3fs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="drivers/vsys.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="heap.h" />
 		<Unit filename="idt.h" />
 		<Unit filename="main.c">
@@ -79,6 +88,7 @@
 		</Unit>
 		<Unit filename="time.h" />
 		<Unit filename="types.h" />
+		<Unit filename="vsys.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

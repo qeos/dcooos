@@ -38,6 +38,11 @@ void _main(){
     init_paging();
 
     init_heap();
+    
+    // drivers
+    if(parametresHW->bootDevice & 0x80 == 0x80){
+        
+    }
 
     HLT;
 

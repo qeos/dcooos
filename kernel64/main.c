@@ -39,6 +39,13 @@ void _main(){
 
     init_heap();
 
+    // drivers
+    if((parametresHW->bootDrive & 0x80) == 0x80){
+        init_hdd(parametresHW->bootDrive);
+    }
+
+    init_vsys();
+
     HLT;
 
 

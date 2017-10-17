@@ -41,7 +41,7 @@ FreeBlockID = 0x8888
 ; =======================================================================
 ;!! Super block !!;
 
-    sbSIG dw 0xFCB0
+    sbSIG dd 0xFCB0
 
   sbTotalBlocks dd FDDTotalBlocks
 ; 1 - 512 bytes

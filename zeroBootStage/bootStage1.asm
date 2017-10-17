@@ -243,8 +243,8 @@ nearJump:
 
     mov si, SB_SEG
     mov es, si
-    mov ax, [es:0x0e]
-    mov bx, [es:0x0e+2]
+    mov ax, [es:0x10]
+    mov bx, [es:0x10+2]
     mov cx, 0x0000
     mov dx, 0x0000
     mov si, AT_SEG
@@ -255,8 +255,8 @@ nearJump:
 ; load kernel
     mov si, SB_SEG
     mov es, si
-    mov ax, [es:0x1e]
-    mov bx, [es:0x1e+2]
+    mov ax, [es:0x20]
+    mov bx, [es:0x20+2]
     mov cx, 0x0000
     mov dx, 0x0000
     mov si, ARC_KERNELSEG
