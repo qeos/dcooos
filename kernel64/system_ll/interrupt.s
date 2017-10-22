@@ -201,7 +201,7 @@ irq_common_stub:
     iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
 
-[GLOBAL _read_eip]
-_read_eip:
+[GLOBAL _read_rip]
+_read_rip:
   pop rax
   jmp rax

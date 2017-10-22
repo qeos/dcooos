@@ -443,9 +443,9 @@ static void l3fs_readdirnodes(vnode_t *node)
 
 
 vnode_t *init_l3fs(){
-    u1 *b = (u1*)kmalloc(SIZE_OF_SECTOR);
+    u2 *b = (u2*)kmalloc(SIZE_OF_SECTOR);
     boot_drive_read_sector(b, 0);
-    u4 sbsect = b[0x10];
+    u4 sbsect = b[0x08]/512;
     kfree(b);
 
     superblock_rec = (superblock_t*)kmalloc(SIZE_OF_SECTOR*SIZE_OF_SUPERBLOCK);
@@ -454,12 +454,11 @@ vnode_t *init_l3fs(){
         printk_syslog("L3FS: Bad signature.\n");
     }
 
-#ifdef DEBUG_L3FS
-    PD("init l3fs")
-    printk_syslog("\nSuperBlock.SIG = ");
-    printkd_bochs(superblock_rec->sig,'h');
+#ifdef DEBUG_LEVEL & E_NOTICE
+    printk_syslog("L3FS:\nSuperBlock.SIG = ");
+    printk_syslog_number(superblock_rec->sig,'h');
     printk_syslog("\nVolume size = ");
-    printkd_bochs(superblock_rec->total_blocks*SIZE_OF_SECTOR/1024,'d');
+    printk_syslog_number(superblock_rec->total_blocks*SIZE_OF_SECTOR/1024,'d');
     printk_syslog(" Kb\n");
 #endif
 
@@ -489,14 +488,13 @@ vnode_t *init_l3fs(){
     inode->place.data = superblock_rec->root_data;
     inode->place.cache = superblock_rec->root_cache;
     inode->buffered_sector = -1; // unbuffered
-#ifdef DEBUG_L3FS
-    PD("init l3fs")
-    printk_syslog("\nRoot.inode.place.descr = ");
-    printkd_bochs(inode->place.descr,'h');
+#ifdef DEBUG_LEVEL & E_NOTICE
+    printk_syslog("L3FS: init\nRoot.inode.place.descr = ");
+    printk_syslog_number(inode->place.descr,'h');
     printk_syslog("\nRoot.inode.place.data = ");
-    printkd_bochs(inode->place.data,'h');
+    printk_syslog_number(inode->place.data,'h');
     printk_syslog("\nRoot.inode.place.cache = ");
-    printkd_bochs(inode->place.cache,'h');
+    printk_syslog_number(inode->place.cache,'h');
     printk_syslog("\n");
 #endif
     //kfree(sb);

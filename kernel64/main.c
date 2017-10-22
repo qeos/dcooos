@@ -2,13 +2,6 @@
 #include "types.h"
 #include "heap.h"
 
-typedef struct{
-    u4 bootDrive;
-    u4 memorySize;
-} __attribute__((packed)) t_parametresHW;
-
-t_parametresHW *parametresHW;
-
 void _main(){
     // *********************************************************************
     // INITIALIZATION
@@ -22,6 +15,10 @@ void _main(){
 
     // init serial
     init_serial();
+
+    printk_syslog("VESA lfb: ");
+    printk_syslog_numberInFormat(parametresHW->VBElfb, 'h', 8);
+    printk_syslog("\n");
 
 #if DEBUG_LEVEL & E_NOTICE
     printk_syslog("--------------------------------------------------------------------------\n");
@@ -45,6 +42,12 @@ void _main(){
     }
 
     init_vsys();
+
+    init_syscall();
+
+    init_task();
+
+    init_objects();
 
     HLT;
 

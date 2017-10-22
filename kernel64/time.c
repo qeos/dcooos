@@ -2,6 +2,8 @@
 #include "types.h"
 #include "time.h"
 
+t_time startup_time;
+
 void getTime(){
     u1 options;
 
@@ -40,6 +42,11 @@ void getTime(){
 //    STI
     asm("rdtsc":"=a"(startupTime.lo_tick), "=d"(startupTime.hi_tick));
 
+}
+
+u8 get_globalticks(){
+    getTime();
+    return startup_time.hi_tick<<32+startup_time.lo_tick;
 }
 
 void printk_syslog_currentTime(){

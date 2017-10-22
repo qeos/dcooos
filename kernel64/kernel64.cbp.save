@@ -43,13 +43,35 @@
 		<Unit filename="drivers/vsys.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="file_formats.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="heap.h" />
 		<Unit filename="idt.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="main.h" />
+		<Unit filename="object_file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="object_keyboard.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="object_log.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="object_memory.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="objects.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="objects.h" />
 		<Unit filename="serial.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="str_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="strings.c">
@@ -58,6 +80,10 @@
 		<Unit filename="stringsPrintk.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="syscall.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="syscall.h" />
 		<Unit filename="system_ll/heap.c">
 			<Option compilerVar="CC" />
 		</Unit>

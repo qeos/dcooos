@@ -54,7 +54,7 @@ u1 *strcpy(u1 *dest, const u1 *src)
 // return dest.
 u1 *strncpy(u1 *dest, const u1 *src, u8 len)
 {
-    u8 i=len-1;
+    int i=len-1;
     while(i>=0){
         dest[i] = src[i];
         i--;
@@ -98,7 +98,8 @@ u8 strlen(u1 *src)
 }
 
 u8 str2int(u1 *str){
-    u8 i=0, j=0, k=1;
+    int i=0;
+    u8 j=0, k=1;
     while( ((str[i]>='0') && (str[i]<='9')) ){
         i++;
     }
@@ -113,7 +114,8 @@ u8 str2int(u1 *str){
 
 
 u8 str2hex(u1 *str){
-    u8 i=0, j=0, k=1;
+    int i=0;
+    u8 j=0, k=1;
     while( ((str[i]>='0') && (str[i]<='9')) || ((str[i]>='a') && (str[i]<='f')) || ((str[i]>='A') && (str[i]<='F')) ){
         i++;
     }

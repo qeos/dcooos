@@ -1,6 +1,8 @@
 #ifndef MAIN_H_INCLUDED
 #define MAIN_H_INCLUDED
 
+#include "types.h"
+
 #define true 1
 #define false 0
 
@@ -41,5 +43,12 @@
 
 #define HLT while(1){asm("hlt");};
 
+typedef struct{
+    u4 bootDrive;
+    u4 memorySize;
+    u4 VBElfb;
+} __attribute__((packed)) t_parametresHW;
+
+t_parametresHW *parametresHW;
 
 #endif // MAIN_H_INCLUDED

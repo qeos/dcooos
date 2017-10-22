@@ -1,11 +1,17 @@
 #ifndef TASK_H_INCLUDED
 #define TASK_H_INCLUDED
 
+#include "objects.h"
+#include "idt.h"
+
 #define TS_NORMAL   0x00
 #define TS_CREATE   0x01
 #define TS_SLEEP    0x02
 #define TS_KILL     0x03
 #define TS_CRASH    0x04
+
+#define TT_FUNCTION 0x00
+#define TT_MESSAGE  0x01
 
 typedef struct task{
     u8 id;
@@ -32,5 +38,6 @@ typedef struct task{
 task_t *current_task;
 task_t *tasks;
 
+void sleep();
 
 #endif // TASK_H_INCLUDED

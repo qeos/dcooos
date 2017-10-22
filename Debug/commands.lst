@@ -1,4 +1,4 @@
-break *0x7c00
+break *0x08383
 set disassemble-next-line on
 display/i $pc
 target remote localhost:1234

@@ -2,12 +2,45 @@
 #include "types.h"
 #include "heap.h"
 
-typedef struct{
-    u4 bootDrive;
-    u4 memorySize;
-} __attribute__((packed)) t_parametresHW;
+typedef struct {
+  u2 attributes;
+  u1 winA,winB;
+  u2 granularity;
+  u2 winsize;
+  u2 segmentA, segmentB;
+  u4 realFctPtr;
+  u2 pitch; // bytes per scanline
 
-t_parametresHW *parametresHW;
+  u2 Xres, Yres;
+  u1 Wchar, Ychar, planes, bpp, banks;
+  u1 memory_model, bank_size, image_pages;
+  u1 reserved0;
+
+  u1 red_mask, red_position;
+  u1 green_mask, green_position;
+  u1 blue_mask, blue_position;
+  u1 rsv_mask, rsv_position;
+  u1 directcolor_attributes;
+
+  u4 physbase;  // your LFB (Linear Framebuffer) address ;)
+  u4 reserved1;
+  u2 reserved2;
+} __attribute__((packed)) t_ModeInfoBlock;
+
+typedef struct {
+   u4 VbeSignature;             // == "VESA"
+   u2 VbeVersion;                 // == 0x0300 for VBE 3.0
+   u2 OemStringPtr[2];            // isa vbeFarPtr
+   u2 Capabilities;
+   u2 Capabilities1;
+   u2 VideoModePtr[2];         // isa vbeFarPtr
+   //u4 TotalMemory;             // as # of 64KB blocks
+
+   u2 OemSoftwareRev[2];
+   u2 OemVendorNamePtr[2];
+   u2 OemProductNamePtr[2];
+   u2 OemProductRevPtr[2];
+} __attribute__((packed)) t_VbeInfoBlock;
 
 void _main(){
     // *********************************************************************
@@ -20,8 +53,58 @@ void _main(){
     maxmem = parametresHW->memorySize;
     maxmem = (maxmem*64+17472)*1024; // don`t know why
 
+
+    u2 *modes = (u2*)(VbeInfoBlock->VideoModePtr[1]<<4 | VbeInfoBlock->VideoModePtr[0]);
+
     // init serial
     init_serial();
+
+    printk_syslog("VESA info:\n\tOEM: ");
+    printk_syslog((u8*)(VbeInfoBlock->OemStringPtr[1]<<4 | VbeInfoBlock->OemStringPtr[0]));
+    printk_syslog("\n\tVBE version: ");
+    printk_syslog_numberInFormat(VbeInfoBlock->VbeVersion, 'h', 4);
+    printk_syslog("\n\tOEM software revision: ");
+    printk_syslog_numberInFormat(VbeInfoBlock->OemSoftwareRev[0], 'h', 4);
+    printk_syslog(":");
+    printk_syslog_numberInFormat(VbeInfoBlock->OemSoftwareRev[1], 'h', 4);
+    printk_syslog("\n\tOEM vendor: ");
+    printk_syslog((u8*)(VbeInfoBlock->OemVendorNamePtr[1]<<4 | VbeInfoBlock->OemVendorNamePtr[0]));
+    printk_syslog("\n\tOEM product name: ");
+    printk_syslog((u8*)(VbeInfoBlock->OemProductNamePtr[1]<<4 | VbeInfoBlock->OemProductNamePtr[0]));
+    printk_syslog("\n\tVideo mode pointer: ");
+    printk_syslog_numberInFormat(VbeInfoBlock->VideoModePtr[1], 'h', 4);
+    printk_syslog(":");
+    printk_syslog_numberInFormat(VbeInfoBlock->VideoModePtr[0], 'h', 4);
+    printk_syslog("\n");
+
+    printk_syslog("\tAll modes:\n");
+    u2 i;
+    while(modes[i] != 0xffff){
+        printk_syslog("\t\t");
+        printk_syslog_number(i, 'd');
+        printk_syslog(":\t");
+        printk_syslog_numberInFormat(modes[i], 'h', 4);
+        printk_syslog("\n");
+        i++;
+    }
+
+    asm("movl $0x4f07, %%eax\n\t"
+        "movl $0x0000, %%ebx\n\t"
+        "xorq %%rdi, %%rdi\n\t"
+        "movl %0, %%edi\n\t"
+        "xorq %%rcx, %%rcx\n\t"
+        "movw 2(%%rdi), %%cx\n\t"
+        "addq %%rcx, %%rdi\n\t"
+        "movw $0x0000, %%cx\n\t"
+        "movw $0x0010, %%dx\n\t"
+        "callq %%rdi"::"m"(parametresHW->ModeInfo):"%rax", "%rdx"
+        );
+
+    for(u8 i = 0x100000; i<0x110000; i++){
+        asm(//"movq %0, %%rax\n\t"
+            "movb $0xff, (%0)\n\t"
+            ::"r"(i));
+    }
 
 #if DEBUG_LEVEL & E_NOTICE
     printk_syslog("--------------------------------------------------------------------------\n");
@@ -38,11 +121,17 @@ void _main(){
     init_paging();
 
     init_heap();
-    
+
     // drivers
-    if(parametresHW->bootDevice & 0x80 == 0x80){
-        
+    if((parametresHW->bootDrive & 0x80) == 0x80){
+        init_hdd(parametresHW->bootDrive);
     }
+
+    init_vsys();
+
+    init_syscall();
+
+    init_task();
 
     HLT;
 

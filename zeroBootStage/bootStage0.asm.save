@@ -25,8 +25,8 @@ bootStart:
     bootVersion db 0x00         ; reserved for futures
     bootIdent   db "DCOOOS   v1.0"
     ; we need align next var to offset 0x10
-    ; else see 'l3fs.c:
-    bootLength  dw 0x02         ; count of boot blocks must be load for stage 1
+    ; else see 'l3fs.c' in func 'init_l3fs()'
+    bootLength  dw lenBlocks         ; count of boot blocks must be load for stage 1
 ; --------------------------------------------
 ; this boot variables
 ; --------------------------------------------
@@ -67,6 +67,8 @@ go:
 
     ; save boot drive
     mov [bootDrive], dl
+    mov ax, [bootLength]
+    shr
 
     ; load
     mov ax, [bootLength]

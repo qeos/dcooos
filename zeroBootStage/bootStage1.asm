@@ -15,10 +15,10 @@
 ;   0x00008200 - 0x00008400 - 0x200     - continued boot code
 ;
 ;   0x00009000 - 0x00009200 - 0x200     - super block
-;   0x00010000 - 0x00020000 - 0x5a00    - allcation table
+;   0x00010000 - 0x00020000 - 0x5a00    - allocation table
 ;   0x00020000 - 0x00025000 - 0x5000    - kernel stack
 ;   0x00025000 - 0x00050000 - 0x25000   - kernel code
-;   0x00050000 - 0x00070000 - 0x20000   - acr kernel
+;   0x00050000 - 0x00070000 - 0x20000   - arc kernel
 ;**********************************************
 
 ; -------------------------------------------------------
@@ -232,6 +232,8 @@ loadBlock:
 parametresHW:
     .bootDrive dd 0
     .memorySize dd 0
+    .vbeLfb dd 0
+errorString4 db 'bootStage1: VESA fail.',0
 
 nearJump:
 
@@ -264,6 +266,77 @@ nearJump:
     mov si, 0x0000
     call loadBlock
 
+    jmp videoSet
+
+
+VBEInfo times 512 db 0
+ModeInfo times 256 db 0
+i dw 0
+errorString5 db 'bootStage1: VESA no compatible video mode.',0
+
+videoSet:
+; -------------------------------------------------------
+; Set video mode
+; -------------------------------------------------------
+    mov di, ds
+    mov es, di
+    mov di, VBEInfo
+
+    mov ax, 0x4f00
+    int 0x10
+
+    mov cx, [VBEInfo+16]
+    mov fs, cx
+
+.loopModes:
+
+    ; get mode information
+    mov di, ds
+    mov es, di
+    mov di, ModeInfo
+
+    mov ax, 0x4f01
+    mov si, [VBEInfo+14] ; VideoModePtr
+    mov cx, [i]
+    shl cx, 1
+    add si, cx
+    mov cx, [fs:si]
+    cmp cx, 0xffff
+    mov si, errorString5
+    je fail
+    int 0x10
+
+    inc word [i]
+
+    ; check res
+    mov cx, [ModeInfo+18]
+    cmp cx, 800
+    jne .loopModes
+    mov dx, [ModeInfo+20]
+    cmp dx, 600
+    jne .loopModes
+    mov bl, [ModeInfo+25]
+    cmp bl, 16
+    jne .loopModes
+    mov bh, [ModeInfo+27]
+    cmp bh, 6
+    jne .loopModes
+
+    mov cx, [ModeInfo+40]
+    mov [parametresHW.vbeLfb], cx
+    mov cx, [ModeInfo+42]
+    mov [parametresHW.vbeLfb+2], cx
+
+    mov si, [VBEInfo+14] ; VideoModePtr
+    mov cx, [i]
+    shl cx, 1
+    add si, cx
+    mov bx, [fs:si]
+.exitLoopModes:
+
+    mov ax, 0x4f02
+    or bx, 0x4000  ; 800x600 5:6:5
+    int 0x10
 
 
 ; -------------------------------------------------------
@@ -415,3 +488,4 @@ gdt:
         dq gdt + DEF_INITSEG*0x10
 
 times (($-$$)/512+1)*512-($-$$) db 0
+lenBlocks:

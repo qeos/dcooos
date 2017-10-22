@@ -26,7 +26,7 @@ bootStart:
     bootIdent   db "DCOOOS   v1.0"
     ; we need align next var to offset 0x10
     ; else see 'l3fs.c' in func 'init_l3fs()'
-    bootLength  dw 0x02         ; count of boot blocks must be load for stage 1
+    bootLength  dw lenBlocks
 ; --------------------------------------------
 ; this boot variables
 ; --------------------------------------------
@@ -47,7 +47,7 @@ startup:
     jmp DEF_INITSEG:go
 
 ; if we has error
-errorString db 'bootStage0: Error while loading code of stage 1.',0
+errorString db 'bootStage0: Error loading stage 1.',0
 fail:
     mov ah, 0x0e
     mov bl, 0x47
@@ -67,6 +67,10 @@ go:
 
     ; save boot drive
     mov [bootDrive], dl
+    ; correct boot length
+    mov ax, [bootLength]
+    shr ax, 9
+    mov [bootLength], ax
 
     ; load
     mov ax, [bootLength]
