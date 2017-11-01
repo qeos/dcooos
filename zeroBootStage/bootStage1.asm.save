@@ -15,11 +15,35 @@
 ;   0x00008200 - 0x00008400 - 0x200     - continued boot code
 ;
 ;   0x00009000 - 0x00009200 - 0x200     - super block
+;              - 0x0000ffff             - stack
 ;   0x00010000 - 0x00020000 - 0x5a00    - allocation table
 ;   0x00020000 - 0x00025000 - 0x5000    - kernel stack
 ;   0x00025000 - 0x00050000 - 0x25000   - kernel code
 ;   0x00050000 - 0x00070000 - 0x20000   - arc kernel
 ;**********************************************
+
+struc SB_Data
+    .sbSIG: resw 2
+
+    .sbTotalBlocks: resw 2
+; 1 - 512 bytes
+; 2 - 1024 bytes
+; n - 512*n bytes
+    .sbBlockSize: resw 2
+
+  .sbAllocationTableSize: resw 2
+  .sbAllocationTable_low: resw 1
+  .sbAllocationTable_hi: resw 1
+
+  .RootDescr: resw 2
+  .RootData:  resw 2
+  .RootCache: resw 2
+
+    .SecondStageLoader_low: resw 1
+    .SecondStageLoader_hi: resw 1
+    .SecondStageLoaderSize: resw 2
+endstruc
+
 
 ; -------------------------------------------------------
 ; welcome message
@@ -227,6 +251,43 @@ loadBlock:
     ret
 
 ; -------------------------------------------------------
+; load all sector in LBA mode for block
+; -------------------------------------------------------
+; DX:CX:BX:AX - sector
+; ES:SI - place
+; DI - count blocks
+loadBlockCount:
+    push di
+.loadBlockCount_loop
+    call loadSector
+
+    ; check count
+    pop di
+    dec di
+    cmp di, 0
+    je .loadBlockCount_ret
+    push di
+
+    push ds
+    mov di, AT_SEG
+    mov ds, di
+    mov di, ax
+    imul di, 4
+    mov ax, [ds:di]
+    mov bx, [ds:di+2]
+    pop ds
+    mov di, es
+    add di, 0x0020
+    mov es, di
+    cmp bx, 0xffff
+    jne .loadBlockCount_loop
+    cmp ax, 0xffff
+    jne .loadBlockCount_loop
+.loadBlockCount_ret:
+    ret
+
+
+; -------------------------------------------------------
 ; parameters from real mode calls
 ; -------------------------------------------------------
 parametresHW:
@@ -245,20 +306,24 @@ nearJump:
 
     mov si, SB_SEG
     mov es, si
-    mov ax, [es:0x10]
-    mov bx, [es:0x10+2]
+;    mov ax, [es:0x10]
+;    mov bx, [es:0x10+2]
+    mov ax, [es:0x0+SB_Data.sbAllocationTable_low]
+    mov bx, [es:0x0+SB_Data.sbAllocationTable_hi]
+    inc b
     mov cx, 0x0000
     mov dx, 0x0000
     mov si, AT_SEG
     mov es, si
     mov si, 0x0000
-    call loadBlock
+    mov di, 120 ; think it enough
+    call loadBlockCount
 
 ; load kernel
     mov si, SB_SEG
     mov es, si
-    mov ax, [es:0x20]
-    mov bx, [es:0x20+2]
+    mov ax, [es:0x0+SB_Data.SecondStageLoader_low]
+    mov bx, [es:0x0+SB_Data.SecondStageLoader_hi]
     mov cx, 0x0000
     mov dx, 0x0000
     mov si, ARC_KERNELSEG
@@ -321,8 +386,11 @@ videoSet:
     mov bh, [ModeInfo+27]
     cmp bh, 6
     jne .loopModes
-    
+
     mov cx, [ModeInfo+40]
+    mov [parametresHW.vbeLfb], cx
+    mov cx, [ModeInfo+42]
+    mov [parametresHW.vbeLfb+2], cx
 
     mov si, [VBEInfo+14] ; VideoModePtr
     mov cx, [i]

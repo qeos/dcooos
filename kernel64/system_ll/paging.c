@@ -3,21 +3,11 @@
 #include "../idt.h"
 #include "../task.h"
 #include "../heap.h"
-
-#define PAGING_SPACE 0x10000000
-
-struct memrec{
-    u8 *pdir;
-    u8 state;
-} __attribute__((packed));
-typedef struct memrec memrec_t;
-
-u1 paging_initialized = 0;
-memrec_t *memorymap;
+#include "../paging.h"
 
 u8 *get_free_page_notmarked(u8 *pdir, u8 init_addr){
     u8 index = init_addr / PAGE_SIZE;
-    while(memorymap[index].state != PS_FREE){
+    while((memorymap[index].state != PS_FREE) && (memorymap[index].state != PS_NULL)){
         index++;
         if (index > maxmem /PAGE_SIZE){
             printk_syslog_number("PAGING: No free mem pages. We need caching.\n");
@@ -70,22 +60,48 @@ void mark_memory_page(u8 *pdir, u8 paddr_index, u1 state){
 u8 *copy_pdir(){
     u8 *current_pdir = current_task->pdir;
 
-    // make page directory for owner PD
-    u8 dst_pdir_index = get_free_page_notmarked(current_pdir,0);
-    u8 *dst_pdir = dst_pdir_index * PAGE_SIZE;
-    mark_memory_page(dst_pdir, dst_pdir_index, PS_USED);
-    memcpy(dst_pdir, current_pdir, PAGE_SIZE);
-    u8 i;
-    for(i=0; i<PAGE_SIZE/4; i++){
-        u8 ptable_index = get_free_page_notmarked(current_pdir,0);
-        u8 *ptable = ptable_index * PAGE_SIZE;
-        mark_memory_page(ptable, ptable_index, PS_USED);
-        memcpy(ptable, (current_pdir[i] & 0xfffff000), PAGE_SIZE);
+    // 512 records by 8 bytes
+    ///////////////////////////////////////
+    u8 *PML4E = kmalloc_aligned(PAGING_TABLE_SIZE, 0x1000);
+    memcpy(PML4E, current_pdir, PAGING_TABLE_SIZE);
 
-        dst_pdir[i] = ((u8)ptable & 0xfffff000) | (dst_pdir[i] & 0xfff);
+    for(u8 i=0; i<PAGING_TABLE_RECORDS; i++){
+        // if present, then copy page
+        if(PML4E[i] & PTE_PRESENT == PTE_PRESENT){
+            ///////////////////////////////////////
+            u8 *PDPE = kmalloc_aligned(PAGING_TABLE_SIZE, 0x1000);
+            memcpy(PDPE, PML4E[i] & PAGING_ADDR_MASK, PAGING_TABLE_SIZE);
+            PML4E[i] = (u8)PDPE | 0x03;
+
+            for(u8 j=0; j<PAGING_TABLE_RECORDS; j++){
+                if(PDPE[j] & PTE_PRESENT == PTE_PRESENT){
+                    ///////////////////////////////////////
+                    u8 *PDE = kmalloc_aligned(PAGING_TABLE_SIZE, 0x1000);
+                    memcpy(PDE, PDPE[j] & PAGING_ADDR_MASK, PAGING_TABLE_SIZE);
+                    PDPE[j] = (u8)PDE | 0x03;
+
+                }
+            }
+
+        }
     }
 
-    return dst_pdir;
+//    // make page directory for owner PD
+//    u8 dst_pdir_index = get_free_page_notmarked(current_pdir,0);
+//    u8 *dst_pdir = dst_pdir_index * PAGE_SIZE;
+//    mark_memory_page(dst_pdir, dst_pdir_index, PS_USED);
+//    memcpy(dst_pdir, current_pdir, PAGE_SIZE);
+//    u8 i;
+//    for(i=0; i<PAGE_SIZE/4; i++){
+//        u8 ptable_index = get_free_page_notmarked(current_pdir,0);
+//        u8 *ptable = ptable_index * PAGE_SIZE;
+//        mark_memory_page(ptable, ptable_index, PS_USED);
+//        memcpy(ptable, (current_pdir[i] & 0xfffff000), PAGE_SIZE);
+//
+//        dst_pdir[i] = ((u8)ptable & 0xfffff000) | (dst_pdir[i] & 0xfff);
+//    }
+
+    return PML4E;
 }
 
 void paging_callback(registers_t *reg){
@@ -119,20 +135,20 @@ void make_physical(u8 *pdir, u8 log_addr, u8 phys_addr, u1 need_markup){
     u8 PML4E_index = log_addr >> 39 & 0x1ff;
     if(pdir[PML4E_index] == 0){
         u8 page_free = get_free_page(pdir, KERNEL_PML4E);
-        pdir[PML4E_index] = page_free & 0xfffffffffffffc00 | 0x03;
+        pdir[PML4E_index] = page_free & PAGING_ADDR_MASK | 0x03;
     }
 
     u8 PDPE_index = log_addr >> 30 & 0x1ff;
-    u8 *pdpe = (u8*)(pdir[PML4E_index] & 0xfffffffffffffc00);
+    u8 *pdpe = (u8*)(pdir[PML4E_index] & PAGING_ADDR_MASK);
     if(pdpe[PDPE_index] == 0){
         u8 page_free = get_free_page(pdir, KERNEL_PML4E);
-        pdpe[PDPE_index] = page_free & 0xfffffffffffffc00 | 0x03;
+        pdpe[PDPE_index] = page_free & PAGING_ADDR_MASK | 0x03;
     }
 
     u8 PDE_index = log_addr >> 21 & 0x1ff;
-    u8 *pde = (u8*)(pdpe[PDPE_index] & 0xfffffffffffffc00);
+    u8 *pde = (u8*)(pdpe[PDPE_index] & PAGING_ADDR_MASK);
     //if(pde[PDE_index] == 0){
-        pde[PDE_index] = phys_addr & 0xfffffffffffffc00 | 0x83;
+        pde[PDE_index] = phys_addr & PAGING_ADDR_MASK | 0x83;
     //}
 
 
@@ -164,7 +180,7 @@ void show_map(){
     printk_syslog_number(maxmem, 'h');
     printk_syslog("\n");
     while (j<maxmem/2){
-        printk_syslog_number(j,'h',8);
+        printk_syslog_numberInFormat(j,'h',8);
         printk_syslog(" ");
         for (i=0; i<0x60; i++){
             if (memorymap[j/PAGE_SIZE+i].state == PS_FREE)
@@ -185,10 +201,6 @@ void show_map(){
         j=j+0x60*PAGE_SIZE;
     }
 }
-
-#define PTE_PRESENT 0x01
-#define PTE_DIRTY   0x40
-#define PTE_ACCESSED 0x20
 
 void paging_print_pdir(u8 *pdir){
     printk_syslog("Page directory at: ");
@@ -314,9 +326,9 @@ void init_paging(){
 
     register_interrupt_handler(14, &paging_callback);
 
-#ifdef HEAP_MOD_HAA
-    memset(KERNEL_HEAP, 0, KERNEL_HEAP_SIZE/0x1000);
-#endif // HEAP_MOD_HAA
+//#ifdef HEAP_MOD_HAA
+//    memset(KERNEL_HEAP, 0, KERNEL_HEAP_SIZE/0x1000);
+//#endif // HEAP_MOD_HAA
 
     // create memory table
     u8 size_pd = maxmem/PAGE_SIZE+1;
@@ -327,33 +339,33 @@ void init_paging(){
     u8 i, j;
     u8 line_addr = 0;
     u8 *pml4e = (u8*)KERNEL_PML4E;
-    memset(pml4e, 0, 0x1000);
+    memset(pml4e, 0, PAGING_TABLE_SIZE);
     u8 freeblock = 0;
     while(line_addr < maxmem){
         u8 PML4E_index = line_addr >> 39 & 0x1ff;
         if(pml4e[PML4E_index] == 0){
             freeblock++;
-            pml4e[PML4E_index] = (KERNEL_PML4E+freeblock*0x1000) & 0xfffffffffffffc00 | 0x03;
+            pml4e[PML4E_index] = (KERNEL_PML4E+freeblock*0x1000) & PAGING_ADDR_MASK | 0x03;
         }
 
         u8 PDPE_index = line_addr >> 30 & 0x1ff;
-        u8 *pdpe = (u8*)(pml4e[PML4E_index] & 0xfffffffffffffc00);
+        u8 *pdpe = (u8*)(pml4e[PML4E_index] & PAGING_ADDR_MASK);
         if(pdpe[PDPE_index] == 0){
             freeblock++;
-            pdpe[PDPE_index] = (KERNEL_PML4E+freeblock*0x1000) & 0xfffffffffffffc00 | 0x03;
+            pdpe[PDPE_index] = (KERNEL_PML4E+freeblock*0x1000) & PAGING_ADDR_MASK | 0x03;
         }
 
         u8 PDE_index = line_addr >> 21 & 0x1ff;
-        u8 *pde = (u8*)(pdpe[PDPE_index] & 0xfffffffffffffc00);
+        u8 *pde = (u8*)(pdpe[PDPE_index] & PAGING_ADDR_MASK);
         if(pde[PDE_index] == 0){
-            pde[PDE_index] = line_addr & 0xfffffffffffffc00 | 0x83;
+            pde[PDE_index] = line_addr & PAGING_ADDR_MASK | 0x83;
         }
 
         line_addr += PAGE_SIZE;
 
-//        pml4e[PDPE_index] = (u8*)((u8)ptab & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
+//        pml4e[PDPE_index] = (u8*)((u8)ptab & PAGING_ADDR_MASK | PE_PRESENT | PE_WRITABLE);
 //        for(j=0; j<PAGE_SIZE/4; j++){
-//            ptab[j] = (u8*)((u8)line_addr & 0xfffffffffffffc00 | PE_PRESENT | PE_WRITABLE);
+//            ptab[j] = (u8*)((u8)line_addr & PAGING_ADDR_MASK | PE_PRESENT | PE_WRITABLE);
 //            mark_memory_page(pdir, line_addr/PAGE_SIZE, PS_FREE);
 //            line_addr = line_addr + PAGE_SIZE;
 //        }
@@ -361,13 +373,13 @@ void init_paging(){
     }
 
     // low mem (00000000 - 000d0000)
-    for(i=0; i<0xd0000/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
+    for(i=0; i<=0xd0000/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
     // unknown VMWare uses (000d0000 - 00100000)
     for(i=0xd0000/PAGE_SIZE; i<0x100000/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
     // heap (01000000 - 02000000)
     for(i=KERNEL_HEAP/PAGE_SIZE; i<(KERNEL_HEAP+KERNEL_HEAP_SIZE)/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
-    // page directory (00200000 - freeblock)
-    for(i=KERNEL_PML4E/PAGE_SIZE; i<KERNEL_PML4E/PAGE_SIZE+freeblock; i++) memorymap[i].state = PS_KERNEL;
+    // page directory (00200000 - 00200000+freeblock*0x200)
+    for(i=KERNEL_PML4E/PAGE_SIZE; i<(KERNEL_PML4E+freeblock*0x200)/PAGE_SIZE; i++) memorymap[i].state = PS_KERNEL;
 
     // set video memory
     //make_physical(KERNEL_PD, init_data.vba_lfb_address, init_data.vba_lfb_address, PS_VIDEO);

@@ -51,10 +51,11 @@ void printk_syslog_number(const u8 n, u1 type){
     printk_syslog(&kbuf_number[i+1]);
 }
 
-u1 *kbuf_numberInFormat = "###############################";
+u1 *kbuf_numberInFormat = "################################";
+int kbuf_numberInFormatLen = 30;
 
-u1 *printk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
-    u8 i=254, j=0;
+u1 *sprintk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
+    u8 i=kbuf_numberInFormatLen, j=0;
     u1 *hh = "0123456789ABCDEF";
     u8 nn=n;
     kbuf_numberInFormat[i+1]=0;
@@ -79,7 +80,7 @@ u1 *printk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
             nn = nn / 16;
             i--;
         }
-        while(254-i<len){
+        while(kbuf_numberInFormatLen-i<len){
             kbuf_numberInFormat[i]='0';
             i--;
         }
@@ -97,14 +98,16 @@ u1 *printk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
             nn=nn>>1;
             i--;
         }
-        while(254-i<len){
+        while(kbuf_numberInFormatLen-i<len){
             kbuf_numberInFormat[i]='0';
             i--;
         }
     }else{
         printk_syslog("unknown type\n\r");
     }
-    printk_syslog(&kbuf_numberInFormat[i+1]);
+    return &kbuf_numberInFormat[i+1];
 }
 
-
+void printk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
+    printk_syslog(sprintk_syslog_numberInFormat(n, type, len));
+}

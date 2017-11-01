@@ -213,7 +213,7 @@ void hdd_write_sector_nosafe(u2 *buff, u8 sector){
 u1 hdc_in_use=0;
 
 void hdd_read_sector(unsigned char *buff, u8 sector){
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_HDD)
     printk_syslog("HDD: read sector: ");
     printk_syslog_number(sector,'h');
     printk_syslog(" \n");
@@ -247,10 +247,9 @@ void hdd_read_sector(unsigned char *buff, u8 sector){
 }
 
 void hdd_write_sector(unsigned char *buff, u4 sector){
-#ifdef DEBUG_HDD
-    PD("write hdd")
-    printk_syslog("sector: ");
-    printkd_bochs(sector,'h');
+#if DEBUG(E_NOTICE, ES_HDD)
+    printk_syslog("HDD: write sector: ");
+    printk_syslog_number(sector,'h');
     printk_syslog(" \n");
 #endif
 
@@ -300,7 +299,7 @@ void detect_hdd(){
     u1 ch = inb(0x1f5);
 
     /* differentiate ATA, ATAPI, SATA and SATAPI */
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_HDD)
     printk_syslog("HDD drive (primary master) is: ");
     if (cl==0x14 && ch==0xEB)
         printk_syslog("PATAPI");
@@ -318,6 +317,10 @@ void detect_hdd(){
 u1 buf[512];
 extern boot_drive_read_sector;
 extern boot_drive_write_sector;
+
+void hdd_callback(registers_t *reg){
+    // empty
+}
 
 void init_hdd(u1 Boot_drive){
 
@@ -342,6 +345,8 @@ void init_hdd(u1 Boot_drive){
 
     boot_drive_read_sector = &hdd_read_sector;
     boot_drive_write_sector = &hdd_write_sector;
+
+    //register_interrupt_handler(0x2e, &hdd_callback);
 
     // Turning motor off
     //outb (0x3F2, 0xC);

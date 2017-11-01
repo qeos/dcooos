@@ -36,17 +36,12 @@ task_t* make_new_user_task(){
 void exec(u1 *fname){
     vnode_t *file;// = (vnode_t*)kmalloc(sizeof(vnode_t));
     file = vfindnode(fname);
-/*    printk_syslog("--------- ");
-    printk_syslog_number(file, 'h');*/
 
     l3fs_file_pointer_t *inode = (l3fs_file_pointer_t*)file->inode;
 
-    //u1 *type = (u1*)kmalloc(256);
     u1 *type = l3fs_get_param(file, "Type");
     if(type){
 
-    /*    printk_syslog(type);
-        printk_syslog(" --- \n\r");*/
 
         task_t *new_task = make_new_user_task();
 
@@ -56,14 +51,6 @@ void exec(u1 *fname){
         strcpy(n, fname);
         n[len] = 0;
         new_task->name = n;
-
-//        paging_print_pdir(new_task->pdir);
-
-    /*    printk_syslog("Made new task ");
-        printk_syslog_number(new_task->id, 'd');
-        printk_syslog(" from task ");
-        printk_syslog_number(current_task->id, 'd');
-        printk_syslog("\n");*/
 
         if(strcmp(type, "CBC") == 0){
             u8 *pdir = make_user_pd();
@@ -143,15 +130,9 @@ void switch_task(registers_t *regs){
     if (tasks == 0)
         return;
 
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: switching task\n");
 #endif
-#endif
-
-/*    u8 old_pdir;
-    asm("movl %%cr3, %0" : "=r" (old_pdir));
-    asm("movl %0, %%cr3" :: "r" (KERNEL_PD));*/
 
     //show_tasks_state();
     current_task->switch_count += 1;
@@ -162,23 +143,6 @@ void switch_task(registers_t *regs){
             new_task = tasks;
         else
             new_task = new_task->next;
-//#ifdef DEBUG_TASK
-//#ifdef DEBUG_LEVEL_0
-//        printk_syslog_number(new_task->id, 'd');
-//        printk_syslog(" state: ");
-//        if (new_task->state == TS_NORMAL)
-//            printk_syslog("TS_NORMAL");
-//        else if (new_task->state == TS_CREATE)
-//            printk_syslog("TS_CREATE");
-//        else if (new_task->state == TS_SLEEP)
-//            printk_syslog("TS_SLEEP");
-//        else if (new_task->state == TS_KILL)
-//            printk_syslog("TS_KILL");
-//        else if (new_task->state == TS_CRASH)
-//            printk_syslog("TS_CRASH");
-//        printk_syslog("\n");
-//#endif
-//#endif
 
         if(new_task->state == TS_NORMAL){
             break;
@@ -195,30 +159,17 @@ void switch_task(registers_t *regs){
 /*        asm("movl %0, %%cr3" :: "r" (old_pdir));*/
         return;
     }
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: found task to switch ID = ");
     printk_syslog_number(new_task->id, 'd');
     printk_syslog("\n");
 #endif
-#endif
-//#ifdef DEBUG_TASK
-//    printk_callstack();
-//#endif // DEBUG_TASK
-
-
-    //if(switching){
-    //    return;
-    //}
 
     switching = true;
 
-
     if((u8)regs == 0){
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: program task switch \n");
-#endif
 #endif
         u8 rsp, rbp, rip, pdir;
         asm volatile("movq %%rsp, %0" : "=m"(rsp));
@@ -227,72 +178,51 @@ void switch_task(registers_t *regs){
         //asm volatile("cli");
         rip = _read_rip();
         if(rip == 0x12345){
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: switch back \n");
-#endif
 #endif
             switching = false;
             return;
         }
-        //asm volatile("sti");
 
         current_task->stack.rsp = rsp;
         current_task->stack.rbp = rbp;
         current_task->stack.rip = rip;
         current_task->task_pdir = pdir;
     }else{
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: hardware task switch \n");
-#endif
 #endif
         current_task->stack.rsp = regs->rsp;
         current_task->stack.rbp = regs->rbp;
         current_task->stack.rip = regs->rip;
     }
 
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: from/to: ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog(" -> ");
-#endif
 #endif
 
     current_task = new_task;
     current_task->state = TS_NORMAL;
 
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
     printk_syslog("TASK: switch into EIP: ");
-    printkdn_bochs(current_task->stack.eip, 'h', 8);
+    printk_syslog_numberInFormat(current_task->stack.rip, 'h', 8);
     if(regs != 0){
         printk_syslog(" from EIP: ");
-        printkdn_bochs(regs->eip, 'h', 8);
+        printk_syslog_numberInFormat(regs->rip, 'h', 8);
     }
     printk_syslog("\n");
-#endif
 #endif
 
     if(current_task->task_pdir == 0){
         current_task->task_pdir = current_task->pdir;
     }
 
-//    asm volatile("         \
-//     cli;                 \
-//     mov %0, %%ecx;       \
-//     mov %1, %%esp;       \
-//     mov %2, %%ebp;       \
-//     mov %3, %%cr3;       \
-//     mov $0x12345, %%eax; \
-//     sti;                 \
-//     jmp *%%ecx           "
-//                : : "r"(eip), "r"(esp), "r"(ebp), "r"(current_directory->physicalAddr));
-//    asm("movl %0, %%cr3" :: "r" (current_task->pdir));
-    //asm("xchg %bx, %bx");
     asm volatile("         \
         cli;                 \
         movq %0, %%rcx;       \
@@ -310,20 +240,11 @@ void switch_task(registers_t *regs){
 extern u8 clisti;
 
 void timer_callback(registers_t *regs){
-    //asm("xchg %bx, %bx");
     tick++;
     current_task->timer_tick++;
-//    if (clisti > 0)
-//        return;
     if(tick > tick_count){
-        tick_count = tick + 1200;
-    //asm("xchg %bx, %bx");
+        tick_count = tick + 2;
         if(!clisti){
-//#ifdef DEBUG_TASK
-//    printk_syslog("TASK: switching by timer: ");
-//    printk_current_time();
-//#endif // DEBUG_TASK
-
             switch_task(regs);
         }
     }
@@ -332,11 +253,8 @@ void timer_callback(registers_t *regs){
 u8 switch_pdir(u8 pdir){
 
     CLI
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: switch_pdir\n");
-    //printk_callstack();
-#endif // DEBUG_LEVEL_0
 #endif // DEBUG_TASK
 
     u8 old_pdir;
@@ -345,22 +263,20 @@ u8 switch_pdir(u8 pdir){
     current_task->pdir = pdir;
     STI
 
-#ifdef DEBUG_TASK
-#ifdef DEBUG_LEVEL_0
+#if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: Switch pdir ");
-    printkdn_bochs(old_pdir,'h',8);
+    printk_syslog_numberInFormat(old_pdir,'h',8);
     printk_syslog(" >>> ");
-    printkdn_bochs(pdir,'h',8);
+    printk_syslog_numberInFormat(pdir,'h',8);
     printk_syslog("\n");
-#endif
 #endif
 
     return pdir;
 }
 
 void sleep(u8 sleep_time){
-#ifdef DEBUG_TASK
-    printk_syslog("Task ");
+#if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog("TASK: Task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog(" now sleeping. Working time: ");
     if(current_task->timer_tick == 0)
@@ -377,8 +293,8 @@ void sleep(u8 sleep_time){
 
 u8 sleep_callback(GUID guid, u8 *params){
     t_object *obj_d = obj_find(guid);
-#ifdef DEBUG_TASK
-    printk_syslog("Sleep to task ");
+#if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog("TASK: Sleep to task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
 #endif
@@ -389,8 +305,8 @@ u8 sleep_callback(GUID guid, u8 *params){
 
 u8 wait_callback(GUID guid, u8 *params){
     t_object *obj_d = obj_find(guid);
-#ifdef DEBUG_TASK
-    printk_syslog("Wait for task ");
+#if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog("TASK: Wait for task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
 #endif
@@ -448,9 +364,6 @@ void init_task(){
     tasks->next = 0;
 
     register_interrupt_handler(32, &timer_callback);
-
-/*    add_sysgate("wait", &switch_task);
-    add_sysgate("sleep", &sleep);*/
 
     printk_syslog("TASK init done.\n");
     s[0] = 0;

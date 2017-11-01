@@ -1,4 +1,5 @@
 #include "../types.h"
+#include "../main.h"
 #include "../vsys.h"
 
 #define SIZE_OF_SECTOR  512
@@ -36,6 +37,11 @@ superblock_t *superblock_rec;
 static void l3fs_check_buffer(l3fs_file_pointer_t *inode, u4 sector)
 {
     if(sector == inode->buffered_sector){
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS: Cache hit for sector ");
+    printk_syslog_number(sector,'h');
+    printk_syslog("\n");
+#endif // DEBUG
         return;
     }
     if(-1 == inode->buffered_sector){
@@ -134,22 +140,23 @@ static u4 l3fs_syswrite(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buff
 
     u4 reading_sector = l3fs_get_sector(start_sector, offset / SIZE_OF_SECTOR);
     u4 writing_sector;
-#ifdef DEBUG_L3FS
-//    PD("l3fs_syswrite")
-    printk_syslog("Need sector ");
-    printkd_bochs(offset / SIZE_OF_SECTOR,'d');
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS: write: Need sector ");
+    printk_syslog_number(start_sector,'h');
     printk_syslog(" from ");
-    printkd_bochs(start_sector,'h');
+    printk_syslog_number(offset / SIZE_OF_SECTOR,'d');
+    printk_syslog(" offset ");
+    printk_syslog_number(offset,'d');
     printk_syslog(", returned ");
-    printkd_bochs(reading_sector,'h');
+    printk_syslog_number(reading_sector,'h');
     printk_syslog("\n");
-    printkd_bochs(l3fs_get_next_sector(reading_sector),'h');
+    printk_syslog_number(l3fs_get_next_sector(reading_sector),'h');
     printk_syslog("\n");
 #endif
     while (size > 0){
-#ifdef DEBUG_L3FS
-        printk_syslog("get sector ");
-        printkd_bochs(reading_sector,'h');
+#if DEBUG(E_NOTICE, ES_L3FS)
+        printk_syslog("\tget sector ");
+        printk_syslog_number(reading_sector,'h');
         printk_syslog("\n");
 #endif
         if (size+fpos > SIZE_OF_SECTOR)
@@ -196,7 +203,7 @@ static u4 l3fs_syswrite(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buff
     boot_drive_write_sector(inode->buffer, start);
 
     /*printk_syslog("l3pv1_sysread: ");
-    printkd_bochs(dpos,'h');
+    printk_syslog_number(dpos,'h');
     printk_syslog("\n\r");*/
 
     return new_size;
@@ -242,22 +249,23 @@ static u4 l3fs_sysread(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buffe
 
 
     u4 reading_sector = l3fs_get_sector(start_sector, offset / SIZE_OF_SECTOR);
-#ifdef DEBUG_L3FS
-//    PD("l3fs_sysread")
-    printk_syslog("Need sector ");
-    printkd_bochs(offset / SIZE_OF_SECTOR,'d');
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS: read: Need sector ");
+    printk_syslog_number(start_sector,'h');
     printk_syslog(" from ");
-    printkd_bochs(start_sector,'h');
+    printk_syslog_number(offset / SIZE_OF_SECTOR,'d');
+    printk_syslog(" offset ");
+    printk_syslog_number(offset,'d');
     printk_syslog(", returned ");
-    printkd_bochs(reading_sector,'h');
-    printk_syslog("\nl3fs_get_next_sector() = ");
-    printkd_bochs(l3fs_get_next_sector(reading_sector),'h');
+    printk_syslog_number(reading_sector,'h');
+    printk_syslog("\n\tl3fs_get_next_sector() = ");
+    printk_syslog_number(l3fs_get_next_sector(reading_sector),'h');
     printk_syslog("\n");
 #endif
     while (size > 0){
-#ifdef DEBUG_L3FS
-        printk_syslog("get sector ");
-        printkd_bochs(reading_sector,'h');
+#if DEBUG(E_NOTICE, ES_L3FS)
+        printk_syslog("\tget sector ");
+        printk_syslog_number(reading_sector,'h');
         printk_syslog("\n");
 #endif
         if (size+fpos > SIZE_OF_SECTOR)
@@ -276,7 +284,7 @@ static u4 l3fs_sysread(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buffe
     }
 
     /*printk_syslog("l3pv1_sysread: ");
-    printkd_bochs(dpos,'h');
+    printk_syslog_number(dpos,'h');
     printk_syslog("\n\r");*/
 
     return dpos;
@@ -384,6 +392,11 @@ static void l3fs_readdirnodes(vnode_t *node)
     node->ptr = (vnode_t*)kmalloc(sizeof(vnode_t) * (node->length+1));
     vnode_t *nodes = (vnode_t*)node->ptr;
     u1 *dtype;
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS: read dir nodes '");
+    printk_syslog(node->node_name);
+    printk_syslog("'\n");
+#endif // DEBUG
     // read directory
     for (i=0; i<node->length; i++){
         nodes[i].inode = kmalloc(sizeof(l3fs_file_pointer_t));
@@ -392,25 +405,21 @@ static void l3fs_readdirnodes(vnode_t *node)
         l3fs_read(node, i*4*3, 4, &inode->place.descr);
         l3fs_read(node, i*4*3+4, 4, &inode->place.data);
         l3fs_read(node, i*4*3+8, 4, &inode->place.cache);
-#ifdef DEBUG_L3FS
-#ifdef DEBUG_LEVEL_0
-        printk_syslog("rec ("); printkd_bochs(i,'d'); printk_syslog(") inode->place.descr = "); printkd_bochs(inode->place.descr,'h'); printk_syslog("\n");
-        printk_syslog("rec ("); printkd_bochs(i,'d'); printk_syslog(") inode->place.data = "); printkd_bochs(inode->place.data,'h'); printk_syslog("\n");
-        printk_syslog("rec ("); printkd_bochs(i,'d'); printk_syslog(") inode->place.cache = "); printkd_bochs(inode->place.cache,'h'); printk_syslog("\n");
-#endif
+#if DEBUG(E_NOTICE, ES_L3FS)
+        printk_syslog("\trec ("); printk_syslog_number(i,'d'); printk_syslog(") inode->place.descr = "); printk_syslog_number(inode->place.descr,'h'); printk_syslog("\n");
+        printk_syslog("\trec ("); printk_syslog_number(i,'d'); printk_syslog(") inode->place.data = "); printk_syslog_number(inode->place.data,'h'); printk_syslog("\n");
+        printk_syslog("\trec ("); printk_syslog_number(i,'d'); printk_syslog(") inode->place.cache = "); printk_syslog_number(inode->place.cache,'h'); printk_syslog("\n");
 #endif
         // Create a new file node.
         nodes[i].node_name = l3fs_get_param(nodes+i, "Name");
         dtype = l3fs_get_param(nodes+i, "Type");
         if(dtype){
             if(strcmp(dtype, ""))
-    #ifdef DEBUG_L3FS
-    #ifdef DEBUG_LEVEL_0
-            printk_syslog("This is directory? = !"); printkd_bochs(strcmp(dtype, "Directory"),'d'); printk_syslog("'\n");
-            printk_syslog("Name = '"); printk_syslog(nodes[i].node_name); printk_syslog("'\n");
-            printk_syslog("Type = '"); printk_syslog(dtype); printk_syslog("'\n");
-    #endif
-    #endif
+#if DEBUG(E_NOTICE, ES_L3FS)
+            printk_syslog("\tThis is directory? = !"); printk_syslog_number(strcmp(dtype, "Directory"),'d'); printk_syslog("'\n");
+            printk_syslog("\tName = '"); printk_syslog(nodes[i].node_name); printk_syslog("'\n");
+            printk_syslog("\tType = '"); printk_syslog(dtype); printk_syslog("'\n");
+#endif
             if (strcmp(dtype, "Directory") == 0){
                 nodes[i].mask = nodes[i].uid = nodes[i].gid = 0;
                 nodes[i].length = 0;
@@ -454,10 +463,10 @@ vnode_t *init_l3fs(){
         printk_syslog("L3FS: Bad signature.\n");
     }
 
-#ifdef DEBUG_LEVEL & E_NOTICE
-    printk_syslog("L3FS:\nSuperBlock.SIG = ");
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS:\n\tSuperBlock.SIG = ");
     printk_syslog_number(superblock_rec->sig,'h');
-    printk_syslog("\nVolume size = ");
+    printk_syslog("\n\tVolume size = ");
     printk_syslog_number(superblock_rec->total_blocks*SIZE_OF_SECTOR/1024,'d');
     printk_syslog(" Kb\n");
 #endif
@@ -488,12 +497,12 @@ vnode_t *init_l3fs(){
     inode->place.data = superblock_rec->root_data;
     inode->place.cache = superblock_rec->root_cache;
     inode->buffered_sector = -1; // unbuffered
-#ifdef DEBUG_LEVEL & E_NOTICE
-    printk_syslog("L3FS: init\nRoot.inode.place.descr = ");
+#if DEBUG(E_NOTICE, ES_L3FS)
+    printk_syslog("L3FS: init\n\tRoot.inode.place.descr = ");
     printk_syslog_number(inode->place.descr,'h');
-    printk_syslog("\nRoot.inode.place.data = ");
+    printk_syslog("\n\tRoot.inode.place.data = ");
     printk_syslog_number(inode->place.data,'h');
-    printk_syslog("\nRoot.inode.place.cache = ");
+    printk_syslog("\n\tRoot.inode.place.cache = ");
     printk_syslog_number(inode->place.cache,'h');
     printk_syslog("\n");
 #endif

@@ -5,7 +5,7 @@
 #define HAA_STATE_TABLE 0x01
 #define HAA_STATE_USED 0xff
 
-#define HAA_BLOCK_SIZE 0x100
+#define HAA_BLOCK_SIZE 0x400
 
 typedef struct{
     u8 state;
@@ -40,7 +40,7 @@ void HAA_mark_record(u8 ptr, u8 size, u1 state){
     }
 }
 
-u8 HAA_kmalloc(u8 len){
+u8 HAA_kmalloc(u8 len, u8 align){
     u8 ipos;
     u8 needBlocks = len / HAA_BLOCK_SIZE;
     if(len % HAA_BLOCK_SIZE != 0){
@@ -49,17 +49,20 @@ u8 HAA_kmalloc(u8 len){
     u8 iipos;
     u8 canUse;
     for(ipos = 0; ipos<=KERNEL_HEAP_SIZE/HAA_BLOCK_SIZE; ipos++){
+        if(ipos % align != 0) con
+            
         if(HAA_table[ipos].state == HAA_STATE_FREE){
-            u8 ptr = KERNEL_HEAP + ipos * HAA_BLOCK_SIZE;
             canUse = -1;
             iipos = needBlocks;
             while((iipos > 0) && (canUse == -1)){
                 if(HAA_table[ipos+iipos-1].state != HAA_STATE_FREE){
                     canUse = 0;
+                    break;
                 }
                 iipos--;
             }
             if(canUse == -1){
+                u8 ptr = KERNEL_HEAP + ipos * HAA_BLOCK_SIZE;
                 HAA_mark_record(ptr, len, HAA_STATE_USED);
                 return ptr;
             }

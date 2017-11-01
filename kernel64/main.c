@@ -1,6 +1,7 @@
 #include "main.h"
 #include "types.h"
 #include "heap.h"
+#include "vsys.h"
 
 void _main(){
     // *********************************************************************
@@ -32,9 +33,9 @@ void _main(){
 
     init_idt();
 
-    init_paging();
-
     init_heap();
+
+    init_paging();
 
     // drivers
     if((parametresHW->bootDrive & 0x80) == 0x80){
@@ -48,6 +49,30 @@ void _main(){
     init_task();
 
     init_objects();
+
+    vnode_t *script;
+    script = vfindnode("/etc/init");
+    u1 *scriptdata = (u1*)kmalloc(script->length);
+    vread(script, 0, script->length, scriptdata);
+
+    u8 index=0, j;
+    while( (strlen(scriptdata+index)>0) && (index<script->length) ){
+        printk_syslog("Executing: '");
+        printk_syslog(scriptdata+index);
+        printk_syslog("'\n");
+        exec(scriptdata+index);
+        index+=strlen(scriptdata+index)+1;
+    }
+    kfree(script);
+    kfree(scriptdata);
+
+    show_tasks();
+    show_objects();
+
+#if DEBUG_LEVEL & E_NOTICE
+    printk_syslog("Kernel initialized.\n");
+    printk_syslog("--------------------------------------------------------------------------\n");
+#endif // DEBUG_LEVEL
 
     HLT;
 

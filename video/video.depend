@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1508704909 source:d:\work\build\os\dcooos\video\video.c
+	"../kernel64/types.h"
+	"../kernel64/main.h"
+	"../kernel64/syscall.h"
+	"../kernel64/strings.c"
+	"../kernel64/objects.h"
+	"../kernel64/system_ll/ioport.c"
+	"video.h"
+
+1507265396 d:\work\build\os\dcooos\kernel64\types.h
+
+1509384418 d:\work\build\os\dcooos\kernel64\main.h
+	"types.h"
+
+1508700523 d:\work\build\os\dcooos\kernel64\syscall.h
+
+1508700523 d:\work\build\os\dcooos\kernel64\strings.c
+	"types.h"
+
+1508704858 d:\work\build\os\dcooos\kernel64\objects.h
+	"task.h"
+
+1508700523 d:\work\build\os\dcooos\kernel64\task.h
+	"objects.h"
+	"idt.h"
+
+1507401179 d:\work\build\os\dcooos\kernel64\idt.h
+
+1507265396 d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
+	"../types.h"
+
+1508704034 d:\work\build\os\dcooos\video\video.h
+

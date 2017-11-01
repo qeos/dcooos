@@ -84,16 +84,16 @@ t_object *objects_main_tree;
 
 #define _OBJ_CALL(object, str) object ? syscall(object, str) : 0;
 
-#define _OBJ_NEW_PROPERTY_U4(object, propname)\
-    u4 *object##_##propname = _OBJ_CALL(object, "new_property " #propname " 4")
+#define _OBJ_NEW_PROPERTY_U8(object, propname)\
+    u8 *object##_##propname = _OBJ_CALL(object, "new_property " #propname " 4")
 
 #define _OBJ_GLOBAL_PROPERTY(object, propname)\
-    u4 *object##_##propname;
+    u8 *object##_##propname;
 
-#define _OBJ_NEW_PROPERTY_U4_GLOBAL(object, propname)\
+#define _OBJ_NEW_PROPERTY_U8_GLOBAL(object, propname)\
     object##_##propname = _OBJ_CALL(object, "new_property " #propname " 4")
 
-#define _OBJ_SET_PROPERTY_U4(object, propname, val)\
+#define _OBJ_SET_PROPERTY_U8(object, propname, val)\
     object##_##propname[0] = val;
 
 GUID obj_create(u1 *name, GUID classof);

@@ -42,7 +42,7 @@ u8 kmalloc_callback(GUID guid, u8 *params){
     u8 result = kmalloc(size);
 
 
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_OBJECT_MEM)
     printk_syslog("'");
     printk_syslog(obj_c->sup->name);
     printk_syslog("' OBJECT_MALLOC: User need ");

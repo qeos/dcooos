@@ -35,6 +35,9 @@
 # binary files
 *.bin
 
+# codeblocks files
+*.save
+
 # VMWare
 VMImage/*.lck/*
 VMImage/*.log
@@ -53,7 +56,4 @@ kernel64/*.i
 kernel64/*.s
 *.map
 *.zip
-
-# codeblocks files
-*.save
 

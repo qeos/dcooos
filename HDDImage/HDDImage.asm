@@ -35,7 +35,8 @@ boot_len = $-boot_start
 boot_secs = boot_len / 512
 ;////////////////////////////////////////////////////////////////////////////////
 
-FDDTotalBlocks = 2880
+;FDDTotalBlocks = 2880
+HDDTotalBlocks = HDDLength / 512
 FreeBlockID = 0x8888
 
 ; =======================================================================
@@ -43,7 +44,7 @@ FreeBlockID = 0x8888
 
     sbSIG dd 0xFCB0
 
-  sbTotalBlocks dd FDDTotalBlocks
+  sbTotalBlocks dd HDDTotalBlocks
 ; 1 - 512 bytes
 ; 2 - 1024 bytes
 ; n - 512*n bytes
@@ -93,11 +94,27 @@ ATable:
   SetLenContAT KFDsSector.Pos, KFDsSector.Len
   SetLenContAT KFDaSector.Pos, KFDaSector.Len
 
+; /bin/
+  SetLenContAT BINDsSector.Pos, BINDsSector.Len
+  SetLenContAT BINDaSector.Pos, BINDaSector.Len
+
+; /bin/video.o
+  SetLenContAT VideoDsSector.Pos, VideoDsSector.Len
+  SetLenContAT VideoDaSector.Pos, VideoDaSector.Len
+
+; /etc
+  SetLenContAT ETCDsSector.Pos, ETCDsSector.Len
+  SetLenContAT ETCDaSector.Pos, ETCDaSector.Len
+
+; /etc/init
+  SetLenContAT InitDsSector.Pos, InitDsSector.Len
+  SetLenContAT InitDaSector.Pos, InitDaSector.Len
+
 ; unused space
 
 ATTLen = $ - (boot_len + 512)
 
-  FreeBlocks  dd FDDTotalBlocks-ATTLen/4 dup FreeBlockID;0x88888888
+  FreeBlocks  dd HDDTotalBlocks-ATTLen/4 dup FreeBlockID;0x88888888
 
 
 ATLen = $ - (boot_len + 512)
@@ -118,6 +135,17 @@ macro sRDaSector{
   dd KFDsSector.Pos
   dd KFDaSector.Pos
   dd 0
+
+;bin/
+  dd BINDsSector.Pos
+  dd BINDaSector.Pos
+  dd 0
+
+;etc/
+  dd ETCDsSector.Pos
+  dd ETCDaSector.Pos
+  dd 0
+
 }
     frame RDaSector, sRDaSector
 
@@ -135,6 +163,83 @@ macro sKFDsSector{
 frame KFDsSector, sKFDsSector
 frame KFDaSector, file '..\kernel64\bin\kernel64.bin'
 
+; =======================================================================
+;!! bin directory !!;
+;!! /bin/
+
+macro sBINDsSector{
+    db 'Name = bin',0
+    db 'Type = Directory',0
+}
+    frame BINDsSector, sBINDsSector
+
+macro sBINDaSector{
+
+  dd VideoDsSector.Pos
+  dd VideoDaSector.Pos
+  dd 0
+
+}
+    frame BINDaSector, sBINDaSector
+
+
+; =======================================================================
+;!! video.o file !!;
+;!! /bin/video.o
+
+macro sVideoDsSector{
+    db 'Description = video object',0
+    db 'Type = CPE',0
+    db 'TypeDescription = compiled code',0
+    db 'Name = video.o',0
+}
+frame VideoDsSector, sVideoDsSector
+frame VideoDaSector, file '..\video\bin\video.exe'
+
+; =======================================================================
+;!! etc directory !!;
+;!! /etc/
+
+macro sETCDsSector{
+    db 'Name = etc',0
+    db 'Type = Directory',0
+}
+    frame ETCDsSector, sETCDsSector
+
+macro sETCDaSector{
+
+;/etc/init
+  dd InitDsSector.Pos
+  dd InitDaSector.Pos
+  dd 0
+
+}
+    frame ETCDaSector, sETCDaSector
+
+; =======================================================================
+;!! initialable script file !!;
+;!! /etc/init
+
+macro sInitDsSector{
+    db 'Description = initialable file list',0
+    db 'Type = SS',0
+    db 'TypeDescription = shell script',0
+    db 'Name = init',0
+}
+frame InitDsSector, sInitDsSector
+
+macro sInitDaSector{
+    db '/bin/video.o',0
+;   db '/bin/test',0
+;   db '/drv/video.lib',0
+;   db '/drv/keyboard.drv',0
+;   db '/drv/pci.lib',0
+;   db '/drv/strings.lib',0
+;    db '/testobject.exe',0
+;   db '/testobject.exe',0
+;   db '/fasm',0
+}
+frame InitDaSector, sInitDaSector
 
 
 
@@ -160,3 +265,4 @@ frame KFDaSector, file '..\kernel64\bin\kernel64.bin'
 ; for vmware 102Mb
 ; use vmware-vdiskmanager.exe for create other size disk
 db 102*1024*1024-0x1e000-($ - start) dup 0
+HDDLength = $

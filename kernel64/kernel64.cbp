@@ -68,6 +68,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="objects.h" />
+		<Unit filename="paging.h" />
 		<Unit filename="serial.c">
 			<Option compilerVar="CC" />
 		</Unit>

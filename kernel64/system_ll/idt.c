@@ -98,7 +98,7 @@ void register_interrupt_handler(u1 n, call_t handler)
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
 {
-#if DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_IDT)
     printk_syslog("isr interrupt: 0x");
     printk_syslog_number(regs.int_no,'h');
     printk_syslog("\n");
@@ -115,9 +115,11 @@ void isr_handler(registers_t regs)
     }
     else
     {
+#if DEBUG_LEVEL & E_NOTICE
         printk_syslog("unhandled interrupt: 0x");
         printk_syslog_number(int_no,'h');
         printk_syslog("\n");
+#endif // DEBUG_LEVEL
         HLT;
     }
 }
@@ -125,7 +127,7 @@ void isr_handler(registers_t regs)
 // This gets called from our ASM interrupt handler stub.
 void irq_handler(registers_t regs)
 {
-#if DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_IDT)
     if (regs.int_no != 32){
         printk_syslog("irq interrupt: 0x");
         printk_syslog_number(regs.int_no,'h');

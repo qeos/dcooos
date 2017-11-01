@@ -2,15 +2,21 @@
 #include "../types.h"
 #include "../heap.h"
 
-u8 kmalloc(u8 len){
+u8 kmalloc_aligned(u8 len, u8 align){
 
 #ifdef HEAP_MOD_HAT
-    return HAT_kmalloc(len);
+    return HAT_kmalloc(len, align);
 #endif // HEAP_MOD_HAT
 
 #ifdef HEAP_MOD_HAA
-    return HAA_kmalloc(len);
+    return HAA_kmalloc(len, align);
 #endif // HEAP_MOD_HAA
+
+}
+
+u8 kmalloc(u8 len){
+
+    return kmalloc_aligned(len, 0);
 
 }
 

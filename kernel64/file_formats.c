@@ -1,38 +1,43 @@
 #include "types.h"
+#include "main.h"
 #include "vsys.h"
 #include "task.h"
 
-struct PE_header_struct{
-  u8  pe_sign;
+struct PECOFF_header_struct{
+  u4  pe_sign;
   u2  pe_cputype;
   u2  pe_objnum;
-  u8  pe_time;
-  u8  pe_cofftbl_off;
-  u8  pe_cofftbl_size;
+  u4  pe_time;
+  u4  pe_cofftbl_off;
+  u4  pe_cofftbl_size;
   u2  pe_nthdr_size;
   u2  pe_flags;
+
   u2  pe_magic;
   u2  pe_link_ver;
-  u8  pe_code_size;
-  u8  pe_idata_size;
-  u8  pe_udata_size;
-  u8  pe_entry;
-  u8  pe_code_base;
-  u8  pe_data_base;
-  u8  pe_image_base;
-  u8  pe_obj_align;
-  u8  pe_file_align;
+  u4  pe_code_size;
+  u4  pe_idata_size;
+  u4  pe_udata_size;
+  u4  pe_entry;
+  u4  pe_code_base;
+  u4  pe_data_base;
+  u4  pe_image_base;
+  u4  pe_obj_align;
+  u4  pe_file_align;
 } __attribute__((packed));
-typedef struct PE_header_struct PE_header_t;
+typedef struct PECOFF_header_struct PECOFF_header_t;
 
 struct PE_oheader_struct{
   u1 o_name[8];
-  u8 o_vsize;
-  u8 o_vaddr;
-  u8 o_psize;
-  u8 o_poff;
-  u1 o_reserved[12];
-  u8 o_flags;
+  u4 o_vsize;
+  u4 o_vaddr;
+  u4 o_psize;
+  u4 o_poff;
+  u4 o_reloff;
+  u4 o_lineoff;
+  u2 o_relnum;
+  u2 o_linenum;
+  u4 o_flags;
 } __attribute__((packed));
 typedef struct PE_oheader_struct PE_oheader_t;
 
@@ -54,34 +59,36 @@ typedef struct PE_oheader_struct PE_oheader_t;
 #define SF_WRITABLE     0x80000000
 
 #define PE_PTR_OFFSET   0x3c
-#define PE_HEADER_SIZE  248
+#define PE_HEADER_SIZE  248+16
 
 #define STACK_SIZE 1024
 
+#define IMAGE_FILE_MACHINE_AMD64 0x8664
 
 void load_pe(vnode_t *file, task_t *task){
     u8 real_PE_offset;
     vread(file, PE_PTR_OFFSET, 4, &real_PE_offset);
 
-    PE_header_t *header = (PE_header_t*)kmalloc(PE_HEADER_SIZE);
+    PECOFF_header_t *header = (PECOFF_header_t*)kmalloc(PE_HEADER_SIZE);
     vread(file, real_PE_offset, PE_HEADER_SIZE, header);
 
-#ifdef DEBUG_PE
-    printk_syslog("SIGN: "); printk_syslog(&header->pe_sign);
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog("FILE FORMATS: load_pe\n");
+    printk_syslog("\tSIGN: "); printk_syslog(&header->pe_sign);
     printk_syslog("\tCPU-TYPE: "); printk_syslog_number(header->pe_cputype,'h');
     printk_syslog("\tOBJ-COUNT: "); printk_syslog_number(header->pe_objnum,'h'); printk_syslog("\n");
-    printk_syslog("Code_base: "); printk_syslog_number(header->pe_code_base,'h');
+    printk_syslog("\tCode_base: "); printk_syslog_number(header->pe_code_base,'h');
     printk_syslog("\tCode_size: "); printk_syslog_number(header->pe_code_size,'h'); printk_syslog("\n");
-    printk_syslog("Data_base: "); printk_syslog_number(header->pe_data_base,'h');
+    printk_syslog("\tData_base: "); printk_syslog_number(header->pe_data_base,'h');
     printk_syslog("\tiData_size: "); printk_syslog_number(header->pe_idata_size,'h');
     printk_syslog("\tuData_size: "); printk_syslog_number(header->pe_udata_size,'h'); printk_syslog("\n");
-    printk_syslog("Image_base: "); printk_syslog_number(header->pe_image_base,'h'); printk_syslog("\n");
+    printk_syslog("\tImage_base: "); printk_syslog_number(header->pe_image_base,'h'); printk_syslog("\n");
 #endif
 
     u2 i;
     PE_oheader_t *oheader = (PE_oheader_t*)kmalloc(sizeof(PE_oheader_t));
-#ifdef DEBUG_PE
-    printk_syslog("Section name\tvSize\t\tvAddr\t\tpSize\t\tpOffset\t\tFlags\n");
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog("Section name\tvSize\t\tvAddr\t\tpSize\t\tpOffset\t\tlineNum\t\tlineOffset\trelNum\t\trelOffset\tFlags\n");
 #endif
 
     u8 code_vaddr=0, data_vaddr;
@@ -94,6 +101,28 @@ void load_pe(vnode_t *file, task_t *task){
         // read oheader
         vread(file, real_PE_offset + PE_HEADER_SIZE + i*sizeof(PE_oheader_t), sizeof(PE_oheader_t), oheader);
 
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog(oheader->o_name);
+    printk_syslog("\t\t");
+    printk_syslog_numberInFormat(oheader->o_vsize, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_vaddr, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_psize, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_poff, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_linenum, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_lineoff, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_relnum, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_reloff, 'h', 8);
+    printk_syslog("\t");
+    printk_syslog_numberInFormat(oheader->o_flags, 'h', 8);
+    printk_syslog("\n");
+#endif
         // check for execution point
         if ((oheader->o_flags & SF_EXECUTABLE) == SF_EXECUTABLE){
             if(exec_addr == 0){
@@ -111,23 +140,25 @@ void load_pe(vnode_t *file, task_t *task){
 //    u8 *pdir = make_user_pd();
 //    task->pdir = pdir;
 
-#ifdef DEBUG_PE
-    printk_syslog("Reading program to PD: ");
-    printkdn_bochs(pdir,'h',8);
-    printk_syslog("\n");
-#endif
-
     u8 pdir = task->pdir;
     u8 old_pdir;
+
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog("FILE FORMATS: Reading program to PD: ");
+    printk_syslog_numberInFormat(pdir,'h',8);
+    printk_syslog("\n");
+#endif
 
     for( i=0; i < header->pe_objnum; i++){
         vread(file, real_PE_offset + PE_HEADER_SIZE + i*sizeof(PE_oheader_t), sizeof(PE_oheader_t), oheader);
 
 //        make_user_area(pdir, header->pe_image_base+oheader->o_vaddr, oheader->o_vsize);
 
-#ifdef DEBUG_PE
-    printk_syslog("Made userarea: ");
-    printkdn_bochs(header->pe_image_base+oheader->o_vaddr,'h',8);
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog("FILE FORMATS: load data into: ");
+    printk_syslog_numberInFormat(header->pe_image_base+oheader->o_vaddr,'h',8);
+    printk_syslog(" size: ");
+    printk_syslog_numberInFormat(oheader->o_psize,'h',8);
     printk_syslog("\n");
 #endif
 
@@ -143,12 +174,11 @@ void load_pe(vnode_t *file, task_t *task){
 
     }
 
-#ifdef DEBUG_PE
-    printk_syslog("Image EIP: ");
-    printkdn_bochs(exec_addr,'h',8);
-    printk_syslog(" physical addr: ");
-    u8 p = pdir[0];
-    printkdn_bochs(p,'h',8);
+#if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog("FILE FORMATS: Image EIP: ");
+    printk_syslog_numberInFormat(exec_addr,'h',8);
+    printk_syslog(" pdir: ");
+    printk_syslog_numberInFormat(pdir,'h',8);
     printk_syslog("\n");
 #endif
 
@@ -163,82 +193,4 @@ void load_pe(vnode_t *file, task_t *task){
 
 
     task->state = TS_NORMAL;
-/*    for( i=0; i < header->pe_objnum; i++){
-        vread(file, real_PE_offset + PE_HEADER_SIZE + i*sizeof(PE_oheader_t), sizeof(PE_oheader_t), oheader);
-        if ((exec_addr == 0) && (oheader->o_flags & SF_EXECUTABLE)){
-            exec_addr = header->pe_image_base+oheader->o_vaddr;
-        }
-#ifdef DEBUG_PE
-        printk_syslog(&oheader->o_name);
-        printk_syslog("\t\t");
-        printkdn_bochs(oheader->o_vsize,'h',8);
-        printk_syslog("\t");
-        printkdn_bochs(oheader->o_vaddr,'h',8);
-        printk_syslog("\t");
-        printkdn_bochs(oheader->o_psize,'h',8);
-        printk_syslog("\t");
-        printkdn_bochs(oheader->o_poff,'h',8);
-        printk_syslog("\t");
-        printkdn_bochs(oheader->o_flags,'h',8);
-        printk_syslog("\n");
-#endif
-
-    }
-    // set execution pointer
-    if (header->pe_code_base != 0){
-        exec_addr = header->pe_image_base+header->pe_code_base;
-    }
-    task->eip = exec_addr;
-
-    u8 *pdir = make_user_pd();
-    task->pdir = pdir;
-
-#ifdef DEBUG_PE
-    printk_syslog("Reading program to PD: ");
-    printkdn_bochs(pdir,'h',8);
-    printk_syslog("\n");
-#endif
-
-    u8 old_pdir;
-
-    for( i=0; i < header->pe_objnum; i++){
-        vread(file, real_PE_offset + PE_HEADER_SIZE + i*sizeof(PE_oheader_t), sizeof(PE_oheader_t), oheader);
-
-        make_user_area(pdir, header->pe_image_base+oheader->o_vaddr, oheader->o_vsize);
-
-#ifdef DEBUG_PE
-    printk_syslog("Made userarea: ");
-    printkdn_bochs(header->pe_image_base+oheader->o_vaddr,'h',8);
-    printk_syslog("\n");
-#endif
-
-        // load file
-        asm("movl %%cr3, %0" : "=r" (old_pdir));
-        asm("movl %0, %%cr3" :: "r" (pdir));
-        vread(file, oheader->o_poff, oheader->o_psize, header->pe_image_base+oheader->o_vaddr);
-        asm("movl %0, %%cr3" :: "r" (old_pdir));
-
-    }
-
-#ifdef DEBUG_PE
-    printk_syslog("Image EIP: ");
-    printkdn_bochs(exec_addr,'h',8);
-    printk_syslog(" physical addr: ");
-    u8 p = pdir[0];
-    printkdn_bochs(p,'h',8);
-    printk_syslog("\n");
-#endif
-
-    kfree(oheader);
-    kfree(header);
-
-
-    u1 *stack = kmalloc(STACK_SIZE);
-//    make_user_area(pdir, stack+STACK_SIZE-1, );
-    task->esp = stack+STACK_SIZE-1;
-    task->ebp = stack+STACK_SIZE-1;
-
-
-    task->state = TS_NORMAL;
-    */
 }
