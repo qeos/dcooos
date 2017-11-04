@@ -4,7 +4,8 @@
 typedef struct registers
 {
    u8 ds;                  // Data segment selector
-   u8 rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
+   //u8 rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
+   u8 rax, rcx, rdx, rbx, rsp, rbp, rsi, rdi; // Pushed by pusha.
    u8 int_no, err_code;    // Interrupt number and error code (if applicable)
    u8 rip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
 } registers_t;

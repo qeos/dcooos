@@ -1,4 +1,5 @@
 #include "types.h"
+#include "main.h"
 #include "idt.h"
 #include "task.h"
 #include "objects.h"
@@ -11,7 +12,7 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
     u8 old_pdir;
     u8 result = 0;
     if ((obj->pdir == objects_main_tree->pdir) || (obj->pdir == current_task->pdir)){
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_SYSCALL)
             printk_syslog("SYSCALL: call local in '");
             printk_syslog_number(obj->pdir,'h');
             printk_syslog("' ");
@@ -30,7 +31,7 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
 #endif
         result = method(guid, params);
     }else{
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_SYSCALL)
             printk_syslog("SYSCALL: call switched in '");
             printk_syslog_number(obj->pdir,'h');
             printk_syslog("'\n");
@@ -73,16 +74,16 @@ u8 syscall_callback(registers_t *regs){
         obj = str2GUID(gstr);
     }
 
-#ifdef DEBUG_LEVEL & E_NOTICE
-    t_object *d = obj_find(obj);
-    printk_syslog("SYSCALL: We has a call task ");
+#if DEBUG(E_NOTICE, ES_SYSCALL)
+    t_object *dyn = obj_find(obj);
+    printk_syslog("SYSCALL: We has a call from task ");
     printk_syslog_number(current_task->id,'d');
-    printk_syslog(" '");
+    printk_syslog(" object '");
+    printk_syslog(dyn->name);
+    printk_syslog("'.['");
     printk_syslog(cstr);
-    printk_syslog("' rax: '");
-    printk_syslog(d->name);
-    printk_syslog("' PML4E at: ");
-    printk_syslog_numberInFormat(d->pdir,'h',16);
+    printk_syslog("'] object PML4E at: ");
+    printk_syslog_numberInFormat(dyn->pdir,'h',16);
     printk_syslog("\n");
 #endif
 
@@ -96,7 +97,7 @@ u8 syscall_callback(registers_t *regs){
         t_object *tobj = obj_find(obj);
         while (tobj->sup != 0){
             tobj = tobj->sup;
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_SYSCALL)
             printk_syslog("SYSCALL: try to get method in '");
             printk_syslog(tobj->name);
             printk_syslog("'\n");
@@ -108,7 +109,7 @@ u8 syscall_callback(registers_t *regs){
         if (meth != 0){
             result = syscall_run(meth, obj, earr);
         }else{
-#ifdef DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_SYSCALL)
             printk_syslog("SYSCALL: Method '");
             printk_syslog(earr[1]);
             printk_syslog("' not found.\n");

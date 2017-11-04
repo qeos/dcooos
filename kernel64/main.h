@@ -23,7 +23,8 @@
 #define ES_TASK         0x0080
 #define ES_OBJECTS      0x0100
 #define ES_OBJECT_MEM   0x0200
-#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_TASK | ES_OBJECTS)
+#define ES_SYSCALL      0x1000
+#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_TASK | ES_OBJECTS | ES_OBJECT_MEM | ES_SYSCALL)
 
 //#define DEBUG(level)   (DEBUG_LEVEL & level == level)
 //#define DEBUG(level, system)   ((DEBUG_LEVEL && level == level) && (DEBUG_SYSTEMS && system == system))

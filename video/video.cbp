@@ -24,6 +24,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+			<Option weight="0" />
+		</Unit>
 		<Unit filename="video.c">
 			<Option compilerVar="CC" />
 		</Unit>

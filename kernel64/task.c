@@ -243,7 +243,7 @@ void timer_callback(registers_t *regs){
     tick++;
     current_task->timer_tick++;
     if(tick > tick_count){
-        tick_count = tick + 2;
+        tick_count = tick + 20;
         if(!clisti){
             switch_task(regs);
         }
