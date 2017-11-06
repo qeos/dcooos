@@ -1,6 +1,7 @@
 #include "../types.h"
 #include "../idt.h"
 #include "../main.h"
+#include "../task.h"
 
 typedef u8(*call_t)(registers_t*);
 
@@ -119,7 +120,9 @@ void isr_handler(registers_t regs)
         printk_syslog("unhandled interrupt: 0x");
         printk_syslog_number(int_no,'h');
         printk_syslog("\n");
+        idt_dump_state(regs);
 #endif // DEBUG_LEVEL
+        current_task->state = TS_CRASH;
         HLT;
     }
 }
@@ -151,6 +154,28 @@ void irq_handler(registers_t regs)
         handler(&regs);
     }
 
+}
+
+void idt_dump_state(registers_t *regs){
+    printk_syslog("Dump state registers:\n");
+    printk_syslog("RAX: "); printk_syslog_numberInFormat(regs->rax, 'h', 16); printk_syslog("\t");
+    printk_syslog("RBX: "); printk_syslog_numberInFormat(regs->rbx, 'h', 16); printk_syslog("\t");
+    printk_syslog("RCX: "); printk_syslog_numberInFormat(regs->rcx, 'h', 16); printk_syslog("\t");
+    printk_syslog("RDX: "); printk_syslog_numberInFormat(regs->rdx, 'h', 16); printk_syslog("\r");
+
+    printk_syslog("RSI: "); printk_syslog_numberInFormat(regs->rsi, 'h', 16); printk_syslog("\t");
+    printk_syslog("RDI: "); printk_syslog_numberInFormat(regs->rdi, 'h', 16); printk_syslog("\t");
+    printk_syslog("RBP: "); printk_syslog_numberInFormat(regs->rbp, 'h', 16); printk_syslog("\t");
+    printk_syslog("RSP: "); printk_syslog_numberInFormat(regs->rsp, 'h', 16); printk_syslog("\r");
+
+    printk_syslog("CS:  "); printk_syslog_numberInFormat(regs->cs, 'h', 4); printk_syslog("\t");
+    printk_syslog("DS:  "); printk_syslog_numberInFormat(regs->ds, 'h', 4); printk_syslog("\t");
+    printk_syslog("SS:  "); printk_syslog_numberInFormat(regs->ss, 'h', 4); printk_syslog("\r");
+
+    printk_syslog("IP: "); printk_syslog_numberInFormat(regs->rip, 'h', 16); printk_syslog("\t");
+    printk_syslog("INT:  "); printk_syslog_numberInFormat(regs->int_no, 'h', 16); printk_syslog("\t");
+    printk_syslog("ERROR:  "); printk_syslog_numberInFormat(regs->err_code, 'h', 16); printk_syslog("\t");
+    printk_syslog("EFLAGS:  "); printk_syslog_numberInFormat(regs->eflags, 'h', 16); printk_syslog("\r");
 }
 
 static void idt_set_gate(u1 num, u8 base, u2 sel, u1 flags)

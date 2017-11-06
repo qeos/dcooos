@@ -13,8 +13,8 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
     u8 result = 0;
     if ((obj->pdir == objects_main_tree->pdir) || (obj->pdir == current_task->pdir)){
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("SYSCALL: call local in '");
-            printk_syslog_number(obj->pdir,'h');
+            printk_syslog("\tSYSCALL: call local in '");
+            printk_syslog_numberInFormat(obj->pdir,'h',16);
             printk_syslog("' ");
             printk_syslog(obj->name);
             printk_syslog(".");
@@ -32,8 +32,8 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
         result = method(guid, params);
     }else{
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("SYSCALL: call switched in '");
-            printk_syslog_number(obj->pdir,'h');
+            printk_syslog("\tSYSCALL: call switched in '");
+            printk_syslog_numberInFormat(obj->pdir,'h',16);
             printk_syslog("'\n");
 #endif
         // switch to object PD
@@ -76,8 +76,8 @@ u8 syscall_callback(registers_t *regs){
 
 #if DEBUG(E_NOTICE, ES_SYSCALL)
     t_object *dyn = obj_find(obj);
-    printk_syslog("SYSCALL: We has a call from task ");
-    printk_syslog_number(current_task->id,'d');
+    printk_syslog("\tSYSCALL: We has a call from task ");
+    printk_syslog_numberInFormat(current_task->id,'d',16);
     printk_syslog(" object '");
     printk_syslog(dyn->name);
     printk_syslog("'.['");
@@ -98,7 +98,7 @@ u8 syscall_callback(registers_t *regs){
         while (tobj->sup != 0){
             tobj = tobj->sup;
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("SYSCALL: try to get method in '");
+            printk_syslog("\tSYSCALL: try to get method in '");
             printk_syslog(tobj->name);
             printk_syslog("'\n");
 #endif
@@ -110,7 +110,7 @@ u8 syscall_callback(registers_t *regs){
             result = syscall_run(meth, obj, earr);
         }else{
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("SYSCALL: Method '");
+            printk_syslog("\tSYSCALL: Method '");
             printk_syslog(earr[1]);
             printk_syslog("' not found.\n");
 #endif

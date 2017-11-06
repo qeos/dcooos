@@ -102,6 +102,10 @@ ATable:
   SetLenContAT VideoDsSector.Pos, VideoDsSector.Len
   SetLenContAT VideoDaSector.Pos, VideoDaSector.Len
 
+; /BG
+  SetLenContAT BGDsSector.Pos, BGDsSector.Len
+  SetLenContAT BGDaSector.Pos, BGDaSector.Len
+
 ; /etc
   SetLenContAT ETCDsSector.Pos, ETCDsSector.Len
   SetLenContAT ETCDaSector.Pos, ETCDaSector.Len
@@ -144,6 +148,11 @@ macro sRDaSector{
 ;etc/
   dd ETCDsSector.Pos
   dd ETCDaSector.Pos
+  dd 0
+
+;BG
+  dd BGDsSector.Pos
+  dd BGDaSector.Pos
   dd 0
 
 }
@@ -195,6 +204,22 @@ macro sVideoDsSector{
 }
 frame VideoDsSector, sVideoDsSector
 frame VideoDaSector, file '..\video\bin\video.exe'
+
+; =======================================================================
+;!! BG.dib file !!;
+;!! /BG
+
+macro sBGDsSector{
+    db 'Description = background picture',0
+    db 'Type = IMG',0
+    db 'TypeDescription = image',0
+    db 'Name = BG',0
+    db 'Width = 640',0
+    db 'Height = 480',0
+    db 'BPP = 24',0
+}
+frame BGDsSector, sBGDsSector
+frame BGDaSector, file '..\screenshots\BG1.pxr'
 
 ; =======================================================================
 ;!! etc directory !!;

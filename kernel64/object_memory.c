@@ -43,13 +43,11 @@ u8 kmalloc_callback(GUID guid, u8 *params){
 
 
 #if DEBUG(E_NOTICE, ES_OBJECT_MEM)
-    printk_syslog("'");
-    printk_syslog(obj_c->sup->name);
-    printk_syslog("' OBJECT_MALLOC: User need ");
+    printk_syslog("OBJECT_MALLOC: User need ");
     printk_syslog_number(size,'d');
-    printk_syslog(" bytes of heap at ");
-    printk_syslog_numberInFormat(result,'h',8);
-    printk_syslog(" bytes of heap.\n");
+    printk_syslog(" bytes, give him at ");
+    printk_syslog_numberInFormat(result,'h',16);
+    printk_syslog("\n");
 #endif
 
     return result;
@@ -68,6 +66,14 @@ u8 require_video_memory(GUID guid, u8 *params){
 
     // get VBE LFB from startup data
     start = parametresHW->VBElfb;
+    size = parametresHW->VBEResX * parametresHW->VBEResX * (parametresHW->VBEBPP / 8);
+#if DEBUG(E_NOTICE, ES_OBJECT_MEM)
+    printk_syslog("OBJECT_MALLOC: need video memory from: ");
+    printk_syslog_numberInFormat(start,'h',8);
+    printk_syslog(" size: ");
+    printk_syslog_number(size,'h');
+    printk_syslog("\n");
+#endif
 
     // need to switch to kernel PD
     u8 old_pdir;

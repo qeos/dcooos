@@ -167,7 +167,7 @@ void switch_task(registers_t *regs){
 
     switching = true;
 
-    if((u8)regs == 0){
+//    if((u8)regs == 0){
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: program task switch \n");
 #endif
@@ -189,14 +189,14 @@ void switch_task(registers_t *regs){
         current_task->stack.rbp = rbp;
         current_task->stack.rip = rip;
         current_task->task_pdir = pdir;
-    }else{
-#if DEBUG(E_NOTICE, ES_TASK)
-    printk_syslog("TASK: hardware task switch \n");
-#endif
-        current_task->stack.rsp = regs->rsp;
-        current_task->stack.rbp = regs->rbp;
-        current_task->stack.rip = regs->rip;
-    }
+//    }else{
+//#if DEBUG(E_NOTICE, ES_TASK)
+//    printk_syslog("TASK: hardware task switch \n");
+//#endif
+//        current_task->stack.rsp = regs->rsp;
+//        current_task->stack.rbp = regs->rbp;
+//        current_task->stack.rip = regs->rip;
+//    }
 
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: from/to: ");
@@ -210,11 +210,11 @@ void switch_task(registers_t *regs){
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
-    printk_syslog("TASK: switch into EIP: ");
-    printk_syslog_numberInFormat(current_task->stack.rip, 'h', 8);
+    printk_syslog("TASK: switch into RIP: ");
+    printk_syslog_numberInFormat(current_task->stack.rip, 'h', 16);
     if(regs != 0){
-        printk_syslog(" from EIP: ");
-        printk_syslog_numberInFormat(regs->rip, 'h', 8);
+        printk_syslog(" from RIP: ");
+        printk_syslog_numberInFormat(regs->rip, 'h', 16);
     }
     printk_syslog("\n");
 #endif
@@ -243,7 +243,7 @@ void timer_callback(registers_t *regs){
     tick++;
     current_task->timer_tick++;
     if(tick > tick_count){
-        tick_count = tick + 20;
+        tick_count = tick + 10;
         if(!clisti){
             switch_task(regs);
         }
@@ -315,6 +315,18 @@ u8 wait_callback(GUID guid, u8 *params){
     while (cur - current_task->timer_tick < ticks){
         switch_task(0);
     }
+    return 0;
+}
+
+u8 exit_callback(GUID guid, u8 *params){
+    t_object *obj_d = obj_find(guid);
+#if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog("TASK: Exit for task ");
+    printk_syslog_number(current_task->id,'d');
+    printk_syslog("\n");
+#endif
+    current_task->state = TS_KILL;
+    switch_task(0);
     return 0;
 }
 

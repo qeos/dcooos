@@ -24,7 +24,7 @@
 #define ES_OBJECTS      0x0100
 #define ES_OBJECT_MEM   0x0200
 #define ES_SYSCALL      0x1000
-#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_TASK | ES_OBJECTS | ES_OBJECT_MEM | ES_SYSCALL)
+#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_L3FS | ES_TASK | ES_OBJECTS | ES_OBJECT_MEM | ES_SYSCALL)
 
 //#define DEBUG(level)   (DEBUG_LEVEL & level == level)
 //#define DEBUG(level, system)   ((DEBUG_LEVEL && level == level) && (DEBUG_SYSTEMS && system == system))
@@ -64,6 +64,9 @@ typedef struct{
     u4 bootDrive;
     u4 memorySize;
     u4 VBElfb;
+    u4 VBEResX;
+    u4 VBEResY;
+    u4 VBEBPP;
 } __attribute__((packed)) t_parametresHW;
 
 t_parametresHW *parametresHW;

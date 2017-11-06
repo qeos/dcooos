@@ -64,6 +64,9 @@ typedef struct{
     u4 bootDrive;
     u4 memorySize;
     u4 VBElfb;
+    u4 VBEResX;
+    u4 VBEResY;
+    u4
 } __attribute__((packed)) t_parametresHW;
 
 t_parametresHW *parametresHW;

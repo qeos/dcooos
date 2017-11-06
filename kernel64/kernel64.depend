@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1509567511 source:d:\work\build\os\dcooos\kernel64\main.c
+1509909567 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 	"heap.h"
@@ -24,7 +24,7 @@
 	"types.h"
 	"time.h"
 
-1509652049 d:\work\build\os\dcooos\kernel64\main.h
+1509992449 d:\work\build\os\dcooos\kernel64\main.h
 	"types.h"
 
 1508700523 source:d:\work\build\os\dcooos\kernel64\time.c
@@ -34,10 +34,11 @@
 
 1507265396 d:\work\build\os\dcooos\kernel64\time.h
 
-1509481147 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+1509873795 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
 	"../types.h"
 	"../idt.h"
 	"../main.h"
+	"../task.h"
 
 1508700523 source:d:\work\build\os\dcooos\kernel64\strings.c
 	"types.h"
@@ -63,7 +64,7 @@
 	"../heap.h"
 	"../idt.h"
 
-1509599008 source:d:\work\build\os\dcooos\kernel64\task.c
+1509915264 source:d:\work\build\os\dcooos\kernel64\task.c
 	"types.h"
 	"main.h"
 	"vsys.h"
@@ -71,7 +72,7 @@
 	"task.h"
 	"objects.h"
 
-1509565766 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+1509910542 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
 	"../types.h"
 	"../main.h"
 	"../idt.h"
@@ -99,24 +100,24 @@
 	"../types.h"
 	"../vsys.h"
 
-1509389899 source:d:\work\build\os\dcooos\kernel64\objects.c
+1509909510 source:d:\work\build\os\dcooos\kernel64\objects.c
 	"main.h"
 	"types.h"
 	"objects.h"
 	"task.h"
 	"idt.h"
 
-1508704858 d:\work\build\os\dcooos\kernel64\objects.h
+1509890319 d:\work\build\os\dcooos\kernel64\objects.h
 	"task.h"
 
-1509647352 source:d:\work\build\os\dcooos\kernel64\syscall.c
+1509890475 source:d:\work\build\os\dcooos\kernel64\syscall.c
 	"types.h"
 	"main.h"
 	"idt.h"
 	"task.h"
 	"objects.h"
 
-1509389969 source:d:\work\build\os\dcooos\kernel64\object_memory.c
+1509916007 source:d:\work\build\os\dcooos\kernel64\object_memory.c
 	"types.h"
 	"objects.h"
 	"task.h"

@@ -33,8 +33,6 @@ void _main(){
 
     init_idt();
 
-    init_heap();
-
     init_paging();
 
     // drivers

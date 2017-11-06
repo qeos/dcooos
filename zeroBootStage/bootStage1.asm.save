@@ -294,6 +294,9 @@ parametresHW:
     .bootDrive dd 0
     .memorySize dd 0
     .vbeLfb dd 0
+    .vbeX dd 0
+    .vbeY dd 0
+    .vbeBPP 
 errorString4 db 'bootStage1: VESA fail.',0
 
 nearJump:
@@ -310,13 +313,12 @@ nearJump:
 ;    mov bx, [es:0x10+2]
     mov ax, [es:0x0+SB_Data.sbAllocationTable_low]
     mov bx, [es:0x0+SB_Data.sbAllocationTable_hi]
-    inc b
     mov cx, 0x0000
     mov dx, 0x0000
     mov si, AT_SEG
     mov es, si
     mov si, 0x0000
-    mov di, 120 ; think it enough
+    mov di, 50 ; think it enough
     call loadBlockCount
 
 ; load kernel
@@ -381,10 +383,10 @@ videoSet:
     cmp dx, 600
     jne .loopModes
     mov bl, [ModeInfo+25]
-    cmp bl, 16
+    cmp bl, 16  ; bits per pixel
     jne .loopModes
     mov bh, [ModeInfo+27]
-    cmp bh, 6
+    cmp bh, 6   ; memory model
     jne .loopModes
 
     mov cx, [ModeInfo+40]

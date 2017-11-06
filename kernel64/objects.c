@@ -88,11 +88,11 @@ t_guid_array *guids;
 
 // ------------------------------------------------------------------------------------------
 t_object *obj_find(GUID guid){
-#if DEBUG(E_NOTICE, ES_OBJECTS)
-    printk_syslog("OBJECTS: Find object ");
-    printk_syslog(GUID2str(guid));
-    printk_syslog("\n");
-#endif
+//#if DEBUG(E_NOTICE, ES_OBJECTS)
+//    printk_syslog("OBJECTS: Find object ");
+//    printk_syslog(GUID2str(guid));
+//    printk_syslog("\n");
+//#endif
     t_guid_array *gar = guids;
     while(GUIDcmp(&gar->guid, &guid) != 0){
         if (gar->next == 0){
@@ -245,7 +245,7 @@ void obj_destroy(GUID obj){
         }
     }
 
-    // destroy all propertyes
+    // destroy all properties
     CLI
     t_property *pkill, *prop = obj_d->property;
     while (prop != 0){
@@ -312,10 +312,10 @@ u8 obj_destroy_callback(GUID guid, u8 *params){
 void obj_property_add(GUID obj, u1 *propname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
-    printk_syslog("OBJECTS: Adding properties '");
-    printk_syslog(propname);
-    printk_syslog("' to object '");
+    printk_syslog("OBJECTS: Adding property '");
     printk_syslog(obj_d->name);
+    printk_syslog("'.'$");
+    printk_syslog(propname);
     printk_syslog("'\n");
 #endif
 
@@ -346,6 +346,8 @@ void obj_property_add(GUID obj, u1 *propname){
     newprop->name = (u1*)kmalloc(l+1);
     strcpy(newprop->name, propname);
     newprop->name[l] = 0;
+    newprop->type = 0;
+    newprop->size = 0;
     newprop->pointer = 0;
     newprop->next = 0;
     newprop->prev = prop;
@@ -359,11 +361,13 @@ void obj_property_add(GUID obj, u1 *propname){
 u8 obj_property_malloc(GUID obj, u1 *propname, u8 size){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
-    printk_syslog("OBJECTS: Kmalloc properties '");
-    printk_syslog(propname);
-    printk_syslog("' to object '");
+    printk_syslog("OBJECTS: kmalloc('");
     printk_syslog(obj_d->name);
-    printk_syslog("'\n");
+    printk_syslog("'.'$");
+    printk_syslog(propname);
+    printk_syslog("', ");
+    printk_syslog_number(size, 'd');
+    printk_syslog(")\n");
 #endif
 
     // check name & find last
@@ -393,11 +397,11 @@ u8 obj_property_malloc(GUID obj, u1 *propname, u8 size){
     return prop->pointer;
 }
 u8 obj_property_add_callback(GUID guid, u8 *params){
-#if DEBUG(E_NOTICE, ES_OBJECTS)
-    printk_syslog("OBJECTS: Object property add, params '");
-    printk_syslog_number(params[0],'d');
-    printk_syslog("'\n");
-#endif
+//#if DEBUG(E_NOTICE, ES_OBJECTS)
+//    printk_syslog("OBJECTS: Object property add, params '");
+//    printk_syslog_number(params[0],'d');
+//    printk_syslog("'\n");
+//#endif
 
     obj_property_add(guid, params[2]);
     u8 result = 0;
@@ -537,7 +541,7 @@ u8 obj_method_add_callback(GUID guid, u8 *params){
 u8 obj_method_get(GUID obj, u1 *methname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
-    printk_syslog("OBJECTS: Geting pointer for method '");
+    printk_syslog("OBJECTS: Getting pointer for method '");
     printk_syslog(methname);
     printk_syslog("' in object '");
     printk_syslog(obj_d->name);
@@ -572,7 +576,7 @@ void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
         printk_syslog_number(obj->is_class,'d');
         printk_syslog(")\n");
 
-#ifndef OBJ_LEVEL_2
+#ifdef OBJ_LEVEL_2
         // show propertyes
         t_property *prop = obj->property;
 #if DEBUG(E_NOTICE, ES_OBJECTS)
@@ -612,8 +616,8 @@ void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
 #endif
             printk_syslog(meth->name);
 #ifdef DEBUG_LEVEL & E_NOTICE
-            printk_syslog("' at 0x");
-            printkdn_bochs(meth->pointer,'h',8);
+            printk_syslog("'\tat 0x");
+            printk_syslog_numberInFormat(meth->pointer,'h',8);
 #endif
 #ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("()");
@@ -642,6 +646,7 @@ void show_objects(){
 
 extern void sleep_callback(GUID guid, u8 *params);
 extern void wait_callback(GUID guid, u8 *params);
+extern void exit_callback(GUID guid, u8 *params);
 extern u8 kmalloc_callback(GUID guid, u8 *params);
 extern u8 kfree_callback(GUID guid, u8 *params);
 extern u8 require_video_memory(GUID guid, u8 *params);
@@ -699,6 +704,7 @@ void init_objects(){
     GUID system = obj_create("system", bo);
     obj_method_add(system, "sleep", &sleep_callback);
     obj_method_add(system, "wait", &wait_callback);
+    obj_method_add(system, "exit", &exit_callback);
 
     // memory
     init_object_memory();

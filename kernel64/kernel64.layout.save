@@ -2,154 +2,49 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Release" />
-	<File name="file_formats.c" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="object_log.c" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5272" topLine="144" />
+			<Cursor1 position="321" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="drivers\hdd.c" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="object_memory.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5398" topLine="193" />
+			<Cursor1 position="1513" topLine="21" />
 		</Cursor>
 	</File>
-	<File name="heap.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="objects.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="163" topLine="0" />
+			<Cursor1 position="10930" topLine="393" />
 		</Cursor>
 	</File>
-	<File name="main.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="syscall.c" open="1" top="1" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="323" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="object_keyboard.c" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="956" topLine="21" />
-		</Cursor>
-	</File>
-	<File name="objects.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="19567" topLine="691" />
-		</Cursor>
-	</File>
-	<File name="system_ll\heap_as_tree.c" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2254" topLine="142" />
-		</Cursor>
-	</File>
-	<File name="objects.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="857" topLine="15" />
-		</Cursor>
-	</File>
-	<File name="task.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="490" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="paging.h" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="299" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="task.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2501" topLine="50" />
-		</Cursor>
-	</File>
-	<File name="types.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="131" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="vsys.h" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="586" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="time.c" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="171" topLine="12" />
-		</Cursor>
-	</File>
-	<File name="drivers\l3fs.c" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="11980" topLine="397" />
-		</Cursor>
-	</File>
-	<File name="strings.c" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1216" topLine="100" />
-		</Cursor>
-	</File>
-	<File name="syscall.c" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2389" topLine="48" />
-		</Cursor>
-	</File>
-	<File name="system_ll\ioport.c" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="25" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="system_ll\paging.c" open="1" top="1" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2952" topLine="53" />
-		</Cursor>
-	</File>
-	<File name="system_ll\interrupt.s" open="0" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3744" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="object_log.c" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="334" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="system_ll\heap_as_array.c" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="163" topLine="3" />
-		</Cursor>
-	</File>
-	<File name="system_ll\heap.c" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="130" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="idt.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="359" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="system_ll\idt.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3629" topLine="241" />
-		</Cursor>
-	</File>
-	<File name="drivers\vsys.c" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="311" topLine="11" />
-		</Cursor>
-	</File>
-	<File name="serial.c" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="102" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="stringsPrintk.c" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2533" topLine="74" />
-		</Cursor>
-	</File>
-	<File name="object_memory.c" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="934" topLine="0" />
+			<Cursor1 position="1185" topLine="15" />
 		</Cursor>
 	</File>
 	<File name="main.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1608" topLine="31" />
+			<Cursor1 position="0" topLine="3" />
+		</Cursor>
+	</File>
+	<File name="main.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="761" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="system_ll\idt.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3498" topLine="88" />
+		</Cursor>
+	</File>
+	<File name="object_file.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="503" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="object_keyboard.c" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="23" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

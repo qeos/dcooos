@@ -457,6 +457,7 @@ void initialize_object(){
     initDone = false;
 
     _OBJ_INIT(0,log);
+
     _OBJ_CALL(log, "print \"OBJECT VIDEO EXECUTE\"");
 
     u8 i;
@@ -480,6 +481,9 @@ void initialize_object(){
 //    tmp[0] = &video_print_callback;
     _OBJ_SET_PROPERTY_U8(video, tmp, &video_print_callback);
     syscall(video, "new_method print $tmp");
+
+    memset(video+2000, 255, 5000);
+
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: added methods: test, putpixel, print\"");
 #endif // DEBUG_VIDEO

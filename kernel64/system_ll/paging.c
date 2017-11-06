@@ -128,7 +128,7 @@ void paging_callback(registers_t *reg){
 }
 
 void make_physical(u8 *pdir, u8 log_addr, u8 phys_addr, u1 need_markup){
-    if (need_markup != 0){
+    if((need_markup != 0) && (need_markup != PS_VIDEO)){
         mark_memory_page(pdir, phys_addr/PAGE_SIZE, need_markup);
     }
 
@@ -323,6 +323,8 @@ u8 t_PDPE __attribute__((aligned(64)));
 u8 t_PDE __attribute__((aligned(64)));
 
 void init_paging(){
+
+    init_heap();
 
     register_interrupt_handler(14, &paging_callback);
 

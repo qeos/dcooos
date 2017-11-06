@@ -294,6 +294,9 @@ parametresHW:
     .bootDrive dd 0
     .memorySize dd 0
     .vbeLfb dd 0
+    .vbeX dd 800
+    .vbeY dd 600
+    .vbeBPP dd 16
 errorString4 db 'bootStage1: VESA fail.',0
 
 nearJump:
@@ -380,10 +383,10 @@ videoSet:
     cmp dx, 600
     jne .loopModes
     mov bl, [ModeInfo+25]
-    cmp bl, 16
+    cmp bl, 16  ; bits per pixel
     jne .loopModes
     mov bh, [ModeInfo+27]
-    cmp bh, 6
+    cmp bh, 6   ; memory model
     jne .loopModes
 
     mov cx, [ModeInfo+40]
