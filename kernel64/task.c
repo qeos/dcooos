@@ -225,10 +225,10 @@ void switch_task(registers_t *regs){
 
     asm volatile("         \
         cli;                 \
-        movq %0, %%rcx;       \
         movq %1, %%rsp;       \
         movq %2, %%rbp;       \
         movq %3, %%cr3;       \
+        movq %0, %%rcx;       \
         movq $0x12345, %%rax; \
         sti;                 \
         jmp *%%rcx           "

@@ -5,5 +5,6 @@
 		<Project filename="kernel64/kernel64.cbp" />
 		<Project filename="HDDImage/HDDImage.cbp" />
 		<Project filename="video/video.cbp" />
+		<Project filename="test/test.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

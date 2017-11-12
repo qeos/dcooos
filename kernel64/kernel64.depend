@@ -64,7 +64,7 @@
 	"../heap.h"
 	"../idt.h"
 
-1509915264 source:d:\work\build\os\dcooos\kernel64\task.c
+1509992590 source:d:\work\build\os\dcooos\kernel64\task.c
 	"types.h"
 	"main.h"
 	"vsys.h"
@@ -100,7 +100,7 @@
 	"../types.h"
 	"../vsys.h"
 
-1509909510 source:d:\work\build\os\dcooos\kernel64\objects.c
+1509993305 source:d:\work\build\os\dcooos\kernel64\objects.c
 	"main.h"
 	"types.h"
 	"objects.h"

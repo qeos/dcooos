@@ -102,6 +102,10 @@ ATable:
   SetLenContAT VideoDsSector.Pos, VideoDsSector.Len
   SetLenContAT VideoDaSector.Pos, VideoDaSector.Len
 
+; /bin/test
+  SetLenContAT TestDsSector.Pos, TestDsSector.Len
+  SetLenContAT TestDaSector.Pos, TestDaSector.Len
+
 ; /BG
   SetLenContAT BGDsSector.Pos, BGDsSector.Len
   SetLenContAT BGDaSector.Pos, BGDaSector.Len
@@ -188,6 +192,10 @@ macro sBINDaSector{
   dd VideoDaSector.Pos
   dd 0
 
+  dd TestDsSector.Pos
+  dd TestDaSector.Pos
+  dd 0
+
 }
     frame BINDaSector, sBINDaSector
 
@@ -204,6 +212,19 @@ macro sVideoDsSector{
 }
 frame VideoDsSector, sVideoDsSector
 frame VideoDaSector, file '..\video\bin\video.exe'
+
+; =======================================================================
+;!! test file !!;
+;!! /bin/test
+
+macro sTestDsSector{
+    db 'Description = test object',0
+    db 'Type = CPE',0
+    db 'TypeDescription = compiled code',0
+    db 'Name = test',0
+}
+frame TestDsSector, sTestDsSector
+frame TestDaSector, file '..\test\bin\test.exe'
 
 ; =======================================================================
 ;!! BG.dib file !!;
