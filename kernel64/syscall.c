@@ -3,6 +3,7 @@
 #include "idt.h"
 #include "task.h"
 #include "objects.h"
+#include "strings.h"
 
 typedef u8 (*method_of_object)(GUID, u8*);
 
@@ -37,11 +38,11 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
             printk_syslog("'\n");
 #endif
         // switch to object PD
-        asm("movq %%cr3, %0" : "=r" (old_pdir));
-        asm("movq %0, %%cr3" :: "r" (obj->pdir));
+        asm volatile("movq %%cr3, %0" : "=r" (old_pdir));
+        asm volatile("movq %0, %%cr3" :: "r" (obj->pdir));
         result = method(guid, params);
         // switch back to
-        asm("movq %0, %%cr3" :: "r" (old_pdir));
+        asm volatile("movq %0, %%cr3" :: "r" (old_pdir));
     }
     return result;
 }
@@ -119,6 +120,8 @@ u8 syscall_callback(registers_t *regs){
 
     free_explode_array(earr);
     kfree(cstr);
+
+    // why?
     if (regs->rax != 0){
         kfree(gstr);
     }

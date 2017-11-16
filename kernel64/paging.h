@@ -16,8 +16,8 @@ struct memrec{
 } __attribute__((packed));
 typedef struct memrec memrec_t;
 
-u1 paging_initialized = 0;
-memrec_t *memorymap;
+extern u1 paging_initialized;
+extern memrec_t *memorymap;
 
 
 #endif // PAGING_H_INCLUDED

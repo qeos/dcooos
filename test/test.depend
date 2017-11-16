@@ -1,3 +1,21 @@
 # depslib dependency file v1.0
 1510442322 source:d:\work\build\os\dcooos\test\main.c
 
+1510636652 source:d:\work\build\os\dcooos\test\test.c
+	"../kernel64/types.h"
+	"../kernel64/syscall.h"
+	"../kernel64/objects.h"
+
+1507265396 d:\work\build\os\dcooos\kernel64\types.h
+
+1510676723 d:\work\build\os\dcooos\kernel64\syscall.h
+
+1510635759 d:\work\build\os\dcooos\kernel64\objects.h
+	"task.h"
+
+1508700523 d:\work\build\os\dcooos\kernel64\task.h
+	"objects.h"
+	"idt.h"
+
+1509646977 d:\work\build\os\dcooos\kernel64\idt.h
+

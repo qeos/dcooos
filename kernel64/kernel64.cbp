@@ -46,10 +46,13 @@
 		<Unit filename="file_formats.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="file_formats.h" />
 		<Unit filename="heap.h" />
 		<Unit filename="idt.h" />
+		<Unit filename="ioport.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
+			<Option weight="30" />
 		</Unit>
 		<Unit filename="main.h" />
 		<Unit filename="object_file.c">
@@ -78,6 +81,7 @@
 		<Unit filename="strings.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="strings.h" />
 		<Unit filename="stringsPrintk.c">
 			<Option compilerVar="CC" />
 		</Unit>

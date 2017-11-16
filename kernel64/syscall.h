@@ -4,7 +4,7 @@
 u8 syscall(void *object, char *func);
 u8 syscall(void *object, char *func){
     u8 ret;
-    asm("int $0x80":"=a" (ret):"a"(object), "b"(func));
+    asm volatile("int $0x80":"=a" (ret):"a"(object), "b"(func));
     return ret;
 }
 

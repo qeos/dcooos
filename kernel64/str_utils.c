@@ -1,4 +1,5 @@
 #include "types.h"
+#include "strings.h"
 
 // exploding string where element 0 has contrained count of elements
 // strgroup - group chars like strings: explode(" ", "str1 str2 'str3 str4' str5", "'") = ["str1","str2","str3 str4", "str5"]

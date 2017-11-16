@@ -1,5 +1,6 @@
 #include "../types.h"
 #include "../vsys.h"
+#include "../strings.h"
 
 vnode_t *vroot;
 vnode_t *log_file;
@@ -97,19 +98,19 @@ vnode_t *vfindnode(char *path){
     }
 }
 
-extern printk_buffer;
-extern system_init;
-extern pos;
+//extern printk_buffer;
+//extern system_init;
+//extern pos;
 void vflash_log(){
-#ifdef VMWARE
-    #ifndef PRINTK_INTO_SERIAL
-    if(system_init){
-
-        vwrite(log_file, log_file->length, strlen(printk_buffer), printk_buffer);
-        pos = 0;
-    }
-    #endif // PRINTK_INTO_SERIAL
-#endif // VMWARE
+//#ifdef VMWARE
+//    #ifndef PRINTK_INTO_SERIAL
+//    if(system_init){
+//
+//        vwrite(log_file, log_file->length, strlen(printk_buffer), printk_buffer);
+//        pos = 0;
+//    }
+//    #endif // PRINTK_INTO_SERIAL
+//#endif // VMWARE
 }
 
 void init_vsys(){

@@ -1,6 +1,8 @@
 #include "../main.h"
 #include "../types.h"
 #include "../idt.h"
+#include "../ioport.h"
+#include "../strings.h"
 
 #define HDD_PRIMARY_PORT    0x1f0
 #define HDD_SECONDARY_PORT  0x170
@@ -111,7 +113,7 @@ u4 hdc_drive_data_ready(){
 
 u8 hdc_drive_error(){
     u1 state = inb(hdd_port+7);
-    return (state) & HDD_STATE_ERROR == HDD_STATE_ERROR;
+    return (state & HDD_STATE_ERROR) == HDD_STATE_ERROR;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -223,7 +225,7 @@ void hdd_read_sector(unsigned char *buff, u8 sector){
     if (hdc_in_use != 0){
         //printk_syslog(": HDC : We must wait previos IO.\n");
     }
-    u4 ii;
+
     while ((hdc_in_use != 0) && (timeout>0)){
         //timer_sleep(10);
         //for (ii=0; ii<100; ii++);
@@ -233,12 +235,12 @@ void hdd_read_sector(unsigned char *buff, u8 sector){
     }
     if (hdc_in_use != 0){
         printk_syslog("!!! Time out for waiting HDC...\n");
-        return -1;
+        return;
     }
 
     hdc_in_use++;
 
-    hdd_read_sector_nosafe(buff, sector);
+    hdd_read_sector_nosafe((u2*)buff, sector);
 
     hdc_in_use--;
 
@@ -257,7 +259,6 @@ void hdd_write_sector(unsigned char *buff, u4 sector){
     if (hdc_in_use != 0){
         //printk_syslog(": HDC : We must wait previos IO.\n");
     }
-    u4 ii;
     while ((hdc_in_use != 0) && (timeout>0)){
         //timer_sleep(10);
         //for (ii=0; ii<100; ii++);
@@ -267,12 +268,12 @@ void hdd_write_sector(unsigned char *buff, u4 sector){
     }
     if (hdc_in_use != 0){
         printk_syslog("!!! Time out for waiting HDC...\n");
-        return -1;
+        return;
     }
 
     hdc_in_use++;
 
-    hdd_write_sector_nosafe(buff, sector);
+    hdd_write_sector_nosafe((u2*)buff, sector);
 
     hdc_in_use--;
 

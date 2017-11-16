@@ -3,7 +3,10 @@
 #include "objects.h"
 #include "task.h"
 #include "idt.h"
+#include "strings.h"
 
+
+GUID EmptyGUID = {0,0,0,0,0};
 
 // ------------------------------------------------------------------------------------------
 // randomizer
@@ -40,7 +43,6 @@ GUID made_GUID(){
 #define GUID_LEN 34
 u1 *GUID2str(GUID guid){
     u1 *str = (u1*)kmalloc(GUID_LEN);
-    u1 *s;
     str[0] = '{';
     strcpy(str+1, sprintk_syslog_numberInFormat(guid.data1,'h',8));
     str[9] = '-';
@@ -152,7 +154,7 @@ t_object *obj_getlast(t_object *objclass){
     return obj;
 }
 
-GUID obj_create(u1 *name, GUID classof){
+GUID obj_create(s1 *name, GUID classof){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
     printk_syslog("OBJECTS: Create new object '");
     printk_syslog(name);
@@ -163,12 +165,12 @@ GUID obj_create(u1 *name, GUID classof){
     t_object *obj_c = obj_find(cobj);
     if (obj_c != 0){
         printk_syslog("!!! Object with GUID already exists.\n");
-        return;
+        return EmptyGUID;
     }
     t_object *obj_class = obj_find(classof);
     if (obj_class == 0){
         printk_syslog("!!! Class object not found.\n");
-        return;
+        return EmptyGUID;
     }
     CLI
     obj_c = (t_object*)kmalloc(sizeof(t_object));
@@ -588,10 +590,7 @@ void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
         while (prop != 0){
             for(i=0;i<tab+1;i++) printk_syslog("  ");
 #ifdef DEBUG_LEVEL & E_NOTICE
-            printk_syslog("'");
-#endif
-#ifdef DEBUG_LEVEL & E_NOTICE
-            printk_syslog("$");
+            printk_syslog("'$");
 #endif
             printk_syslog(prop->name);
 #ifdef DEBUG_LEVEL & E_NOTICE
@@ -618,8 +617,6 @@ void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
 #ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("'\tat 0x");
             printk_syslog_numberInFormat(meth->pointer,'h',8);
-#endif
-#ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("()");
 #endif
             printk_syslog("\n");

@@ -1,6 +1,7 @@
 #include "../types.h"
 #include "../main.h"
 #include "../vsys.h"
+#include "../strings.h"
 
 #define SIZE_OF_SECTOR  512
 #define SIZE_OF_SUPERBLOCK 1
@@ -45,7 +46,7 @@ static void l3fs_check_buffer(l3fs_file_pointer_t *inode, u4 sector)
         return;
     }
     if(-1 == inode->buffered_sector){
-        inode->buffer = (u1*)kmalloc(SIZE_OF_SECTOR);
+        inode->buffer = (u1*)kmalloc((u8)SIZE_OF_SECTOR);
     }
     inode->buffered_sector = sector;
     //floppy_read_sector(inode->buffer, sector);
@@ -111,7 +112,7 @@ static u4 l3fs_get_sector(u4 start_sector, u4 sector_count)
 static u4 l3fs_syswrite(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buffer, u1 layer)
 {
 
-    u4 fsize = l3fs_get_sizeof_data(inode, layer);
+//    u4 fsize = l3fs_get_sizeof_data((u4)inode, layer);
 
 //    if (offset > fsize){
 //        return 0;
@@ -165,7 +166,7 @@ static u4 l3fs_syswrite(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buff
             lpos = size;
         l3fs_check_buffer(inode, reading_sector);
 
-        memcpy(inode->buffer+fpos, buffer+dpos, lpos);
+        memcpy((s1*)inode->buffer+fpos, (s1*)buffer+dpos, lpos);
 
         writing_sector = reading_sector;
         boot_drive_write_sector(inode->buffer, writing_sector);
@@ -198,7 +199,7 @@ static u4 l3fs_syswrite(l3fs_file_pointer_t *inode, u4 offset, u4 size, u1 *buff
     }
 
     l3fs_check_buffer(inode, start);
-    u4 *hsize = (u4)inode->buffer;
+    u4 *hsize = (u4*)inode->buffer;
     hsize[0] = new_size;
     boot_drive_write_sector(inode->buffer, start);
 
@@ -305,7 +306,7 @@ static u1 l3fs_readdir(vnode_t *node, const u4 index, char *str)
     if(!node->ptr)
         l3fs_readdirnodes(node);
 
-    vnode_t *nodes = node->ptr;
+//    vnode_t *nodes = node->ptr;
 
     if (index >= node->length)
         return 0;

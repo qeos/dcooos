@@ -1,11 +1,13 @@
 #include "main.h"
 #include "types.h"
 #include "time.h"
+#include "strings.h"
+#include "ioport.h"
 
-t_time startup_time;
+static t_time startupTime;
+//t_time startup_time;
 
 void getTime(){
-    u1 options;
 
 //    CLI
     do{
@@ -40,13 +42,20 @@ void getTime(){
     startupTime.year = inb(RTCdata);
     startupTime.year = (startupTime.year & 0x0F) + ((startupTime.year / 16) * 10) + 2000;
 //    STI
-    asm("rdtsc":"=a"(startupTime.lo_tick), "=d"(startupTime.hi_tick));
+//    asm volatile("rdtsc":"=a"(startupTime.lo_tick), "=d"(startupTime.hi_tick));
+    asm volatile("rdtsc":"=a"(startupTime.gticks));
 
 }
 
 u8 get_globalticks(){
-    getTime();
-    return startup_time.hi_tick<<32+startup_time.lo_tick;
+//    getTime();
+    asm volatile("rdtsc":"=a"(startupTime.gticks));
+//#if DEBUG(E_NOTICE, ES_TIME)
+//    printk_syslog("TIMER: get global ticks: ");
+//    printk_syslog_number(startupTime.gticks, 'd');
+//    printk_syslog("\n");
+//#endif // DEBUG
+    return startupTime.gticks;
 }
 
 void printk_syslog_currentTime(){
@@ -64,20 +73,41 @@ void printk_syslog_currentTime(){
     printk_syslog(":");
     printk_syslog_numberInFormat(startupTime.seconds,'d',2);
     printk_syslog(" (");
-    printk_syslog_numberInFormat(startupTime.hi_tick,'d',2);
-    printk_syslog(", ");
-    printk_syslog_numberInFormat(startupTime.lo_tick,'d',2);
+    printk_syslog_numberInFormat(startupTime.gticks,'d',16);
     printk_syslog(")\n");
 }
+
+extern u8 ticks_per_process;
 
 void init_time(){
 
     getTime();
-#if DEBUG_LEVEL & E_NOTICE
+    // calculate speed of system
+    u1 cursec = startupTime.seconds;
+    while(cursec == startupTime.seconds) getTime();
+    u8 ticks_per_process_before = get_globalticks();
+    cursec = startupTime.seconds;
+    while(cursec == startupTime.seconds) getTime();
+    u8 ticks_per_process_after = get_globalticks();
+    u8 ticks_per_process_delta = ticks_per_process_after - ticks_per_process_before;
+    ticks_per_process = ticks_per_process_delta >> 19;
+    if(ticks_per_process > 100) ticks_per_process = 10;
+
+
+#if DEBUG(E_NOTICE, ES_TIME)
     printk_syslog_currentTime();
+    printk_syslog("TIMER: ticks: after - before = delta >> 19 = time: ");
+    printk_syslog_number(ticks_per_process_after, 'd');
+    printk_syslog(" - ");
+    printk_syslog_number(ticks_per_process_before, 'd');
+    printk_syslog(" = ");
+    printk_syslog_number(ticks_per_process_delta, 'd');
+    printk_syslog(" >> 19 = ");
+    printk_syslog_number(ticks_per_process, 'd');
+    printk_syslog("\n");
 #endif
 
-#if DEBUG_LEVEL & E_NOTICE
+#if DEBUG(E_NOTICE, ES_TIME)
     printk_syslog("TIMER init done.\n");
 #endif // DEBUG_LEVEL
 }

@@ -46,14 +46,14 @@ t_color get_pixel(u8 x, u8 y){
     return ret;
 }
 
-void put_line(int x1,int y1,int x2,int y2,t_color nState)
+void put_line(u8 x1,u8 y1,u8 x2,u8 y2,t_color nState)
 {
-    unsigned int nTmp;
-    unsigned int nAlt=0;
-    int x,y;        // where is the current pixel.
-    int dx;     // dx is the delta for x
-    int dy;     // dy is the delta for y
-    int StepVal=0;  // variable for figuring out when to increment the other axis.
+    u8 nTmp;
+    u8 nAlt=0;
+    u8 x,y;        // where is the current pixel.
+    u8 dx;     // dx is the delta for x
+    u8 dy;     // dy is the delta for y
+    u8 StepVal=0;  // variable for figuring out when to increment the other axis.
     if (x1>x2 && y1>y2)
     {
         nTmp=x2;
@@ -169,7 +169,7 @@ void put_line(int x1,int y1,int x2,int y2,t_color nState)
 }
 
 #ifdef COLOR_TYPE_565
-#ifdef BPP eq 2
+#if BPP == 2
 
 #define SET_RGB(_t_color_var, R, G, B)\
     _t_color_var.rgb[0] = (u1*)(((R & 0xf8) << 0x08) | ((G & 0xfc) << 5) | (B >> 3));
@@ -233,15 +233,16 @@ void put_string(u1 *str){
 
 u1 *memory;
 _OBJ_GLOBAL_PROPERTY(memory, req_mem);
+u1 *kbuf;
 
 void put_number(const u8 n, char type){
-    int i=254;
+    u8 i=254;
     char *hh = "0123456789ABCDEF";
     u8 nn=n;
 //  u1 *kbuf = kmalloc(256);
-    _OBJ_SET_PROPERTY_U8(memory, req_mem, 256);
-    //mtmp[0] = 256;
-    u1 *kbuf = _OBJ_CALL(memory, "malloc $req_mem");
+//    _OBJ_SET_PROPERTY_U8(memory, req_mem, 256);
+//    //mtmp[0] = 256;
+//    u1 *kbuf = _OBJ_CALL(memory, "malloc $req_mem");
     kbuf[i+1]=0;
 
     if(type=='d'){
@@ -273,9 +274,9 @@ void put_number(const u8 n, char type){
     }
     put_string(&kbuf[i+1]);
     //kfree(kbuf);
-    _OBJ_SET_PROPERTY_U8(memory, req_mem, kbuf);
-    //mtmp[0] = kbuf;
-    _OBJ_CALL(memory, "free $req_mem");
+//    _OBJ_SET_PROPERTY_U8(memory, req_mem, kbuf);
+//    //mtmp[0] = kbuf;
+//    _OBJ_CALL(memory, "free $req_mem");
 }
 
 void put_box(u8 x0, u8 y0, u8 x1, u8 y1, t_color col){
@@ -297,10 +298,10 @@ void make_blur(){
     u8 i;
     u8 *vb = (u8)video_buffer;
     u1 *m = "\1\1\1\1\1\1\1\1";
-    asm("movq %0, %%mm0"::"m"(m[0]));
+    asm volatile("movq %0, %%mm0"::"m"(m[0]));
     u8 mm = WIDTH*HEIGHT*BPP/4;
     for (i=0; i<mm; i++){
-        asm("movq   %0, %%mm1\n"
+        asm volatile("movq   %0, %%mm1\n"
             "psubusb    %%mm0, %%mm1\n"
             "movq   %%mm1, %0"::"m"(vb[i]));
     }
@@ -315,12 +316,12 @@ void show_video_buffer(){
     u8 *vb_bg = (u8)video_bg_buffer;
     u8 *vb = (u8)video_buffer;
     u8 *vb_tmp = (u8)video_tmp_buffer;
-    for (i=sizeofbuffer/4; i>0; i--){
-        asm("movd   %1, %%mm0\n"
-            "movd   %2, %%mm1\n"
+    for (i=sizeofbuffer/8; i>0; i--){
+        asm volatile("movq   %1, %%mm0\n"
+            "movq   %2, %%mm1\n"
 //            "pcmpeqb    %%mm1, %%mm0\n"
             "paddusb  %%mm1, %%mm0\n"
-            "movd   %%mm0, %0"
+            "movq   %%mm0, %0"
             :"=m"(vb_tmp[i]):"m"(vb[i]),"m"(vb_bg[i]));
     }
 
@@ -332,101 +333,12 @@ void show_video_buffer(){
 //        //lfb[i+1] = ((video_tmp_buffer[i].g/4)>>3) + ((video_tmp_buffer[i].r/8)<<3);
 //    }
 
-    for(i=sizeofbuffer/4; i>0; i--){
-        asm("movd   %1, %%mm0\n"
-            "movd   %%mm0, %0"
+    for(i=sizeofbuffer/8; i>0; i--){
+        asm volatile("movq   %1, %%mm0\n"
+            "movq   %%mm0, %0"
             :"=m"(vbe_lfb[i]):"m"(vb_tmp[i]));
     }
 }
-
-/*
-u8 video_test(GUID guid, u8 *params){
-    u8 x, y;
-    t_color col;
-    for (x=0; x<32; x++){
-//        col.r = 0xff;
-//        col.g = 0xff;
-//        col.b = 0xff;
-        SET_RGB(col, 0xff, 0xff, 0xff);
-        for (y=0; y<32; y++){
-            col.g = (31-y)*8+(32-x)*8;
-            col.b = (31-y)*8+x;
-            put_pixel(x, y, col);
-        }
-        for (y=32; y<64; y++){
-            col.r = (63-y)*8;
-            col.g = (32-x)*8;
-            put_pixel(x, y, col);
-        }
-    }
-
-    col.r = 0xff;
-    put_line(10, 50, 400, 50, col);
-    //put_line(500, 100, 50, 250, col);
-    //put_line(300, 350, 250, 50, col);
-    col.g = 0xff;
-
-    //for(x=0; x<100000000; x++)
-        //y=x+y;
-    col.r=0xff;
-    col.g=0x00;
-    col.b=0x00;
-    put_box(2,2, 797,597, col);
-
-    col.r=0x00;
-    col.g=0x4f;
-    col.b=0x20;
-        col.b = x;
-        for(y=60; y<580; y++){
-            put_line(10, y, 780, y, col);
-        }
-
-    u8 x0=100,y0=100,x1=30,y1=200;
-    u8 dx0=2,dy0=1,dx1=3,dy1=1;
-    u8 i=0,j;
-    t_color colw, colb;
-    colb.r = colb.g = colb.b = 0;
-    colw.r = colw.g = colw.b = 0xff;
-        colb.g = 0xff;
-    while (1){
-        put_line(x0,y0,x1,y1,colb);
-        if(x0>=800)
-            dx0=-dx0;
-        if(x1>=800)
-            dx1=-dx1;
-        if(x0<=0)
-            dx0=-dx0;
-        if(x1<=0)
-            dx1=-dx1;
-        if(y0>=600)
-            dy0=-dy0;
-        if(y1>=600)
-            dy1=-dy1;
-        if(y0<=0)
-            dy0=-dy0;
-        if(y1<=0)
-            dy1=-dy1;
-
-        x0+=dx0;
-        y0+=dy0;
-        x1+=dx1;
-        y1+=dy1;
-        put_line(x0,y0,x1,y1,colw);
-        j++;
-        if (j>100){
-            j=0;
-        }
-        make_blur();
-        show_video_buffer();
- //       i++;
-    }
-
-    _OBJ_INIT(0, log);
-    _OBJ_CALL(log, "print \"test video in object\"");
-    return 0;
-}
-*/
-
 
 struct rect{
     u8 left, top, right, bottom;
@@ -458,58 +370,41 @@ void initialize_object(){
 
     _OBJ_INIT(0,log);
 
-    _OBJ_CALL(log, "print \"OBJECT VIDEO EXECUTE\"");
+    _OBJ_CALL(log, "print \"OBJECT VIDEO initializing\"");
 
     u8 i;
-    //for (i=0; i<10000000; i++);
-//    u1 *video;
-//    //BOCHS_BP
-//    video = syscall(0, "create video " GUID_baseobject);
+
+// ---------------------------------------------------------------------
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: making video object\"");
 #endif // DEBUG_VIDEO
 
     _OBJ_CREATE(GUID_baseobject, video);
-    //tmp = syscall(video, "new_property tmp 4");
-    //tmp[0] = &video_test;
     _OBJ_NEW_PROPERTY_U8(video, tmp);
-//    _OBJ_SET_PROPERTY_u8(video, tmp, &video_test);
-//    syscall(video, "new_method test $tmp");
-//    tmp[0] = &put_pixel_callback;
     _OBJ_SET_PROPERTY_U8(video, tmp, &put_pixel_callback);
-    syscall(video, "new_method putpixel $tmp");
-//    tmp[0] = &video_print_callback;
+    _OBJ_CALL(video, "new_method putpixel $tmp");
     _OBJ_SET_PROPERTY_U8(video, tmp, &video_print_callback);
-    syscall(video, "new_method print $tmp");
+    _OBJ_CALL(video, "new_method print $tmp");
 
-    memset(video+2000, 255, 5000);
+    _OBJ_SET_PROPERTY_U8(memory, req_mem, 256);
+    kbuf = _OBJ_CALL(memory, "malloc $req_mem");
 
 #ifdef DEBUG_VIDEO
-    _OBJ_CALL(log, "print \"OBJECT VIDEO: added methods: test, putpixel, print\"");
+    _OBJ_CALL(log, "print \"OBJECT VIDEO: added methods: putpixel, print\"");
 #endif // DEBUG_VIDEO
 
-    _OBJ_INIT_GLOBAL(0,memory);
+// ---------------------------------------------------------------------
 
-//    mtmp = _OBJ_CALL(memory, "new_property tmp 4");
-//    mtmp1 = _OBJ_CALL(memory, "new_property tmp1 4");
-//    //mtmp[0] = VBE_DISPI_LFB_PHYSICAL_ADDRESS;
-//    mtmp[0] = (u8)d[0];
-//    mtmp1[0] = 1024*768*3*3;
-
-    _OBJ_NEW_PROPERTY_U8_GLOBAL(memory, req_mem);
-    //_OBJ_SET_PROPERTY_u8(memory, tmp, (u8)d[0]);
-    //mtmp = _OBJ_CALL(memory, "new_property tmp 4");
-    //mtmp1 = _OBJ_CALL(memory, "new_property tmp1 4");
-//    mtmp[0] = VBE_DISPI_LFB_PHYSICAL_ADDRESS;
-    //mtmp[0] = (u8)d[0];
-    //mtmp[0] = 1024*768*3*3;
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: require video memory 1024x768\"");
 #endif // DEBUG_VIDEO
+    _OBJ_INIT_GLOBAL(0,memory);
+    _OBJ_NEW_PROPERTY_U8_GLOBAL(memory, req_mem);
     _OBJ_SET_PROPERTY_U8(memory, req_mem, 1024*768*3*3);
 
     vbe_lfb = _OBJ_CALL(memory, "get_video_mem $req_mem");
     //mtmp[0] = WIDTH*HEIGHT*BPP+100;
+
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: require memory for buffers...\"");
 #endif // DEBUG_VIDEO
@@ -572,7 +467,7 @@ void initialize_object(){
 //    mtmp1[0] = f;
     _OBJ_NEW_PROPERTY_U8(fs, data);
     _OBJ_SET_PROPERTY_U8(fs, data, fbuf)
-    asm("xchg %bx, %bx");
+    asm volatile("xchg %bx, %bx");
     _OBJ_CALL(fs, "fread $data");
     memset(video_bg_buffer,0,WIDTH*HEIGHT*BPP);
     u8 x,y,j=0x3d5;
@@ -609,7 +504,7 @@ void initialize_object(){
     //copy_rect(dst, mem, dst, video_buffer);
 
     _OBJ_INIT(0, system);
-
+u1 zx = 0xff;
     while(1){
 //        if (ii>100){
     copy_rect(dst1, video_tmp_buffer, dst, mem);
@@ -617,9 +512,11 @@ void initialize_object(){
             put_string("\rcounter: ");
             put_number(st, 'd');
             show_video_buffer();
+//memset(video_buffer+2000, zx, 3000);
+//if(zx==0x0f){zx=0xff;}else{zx=0x0f;}
             ii=0;
 //        }
 //        ii++;
-        _OBJ_CALL(system, "sleep 1")
+        //_OBJ_CALL(system, "sleep 1")
     };
 }

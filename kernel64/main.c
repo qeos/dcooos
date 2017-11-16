@@ -2,14 +2,17 @@
 #include "types.h"
 #include "heap.h"
 #include "vsys.h"
+#include "strings.h"
+
+t_parametresHW *parametresHW;
 
 void _main(){
     // *********************************************************************
     // INITIALIZATION
     // *********************************************************************
 
-    u8 p;
-    asm("movl %%ebx, %0":"=m"(p));
+    u8 p = 0;
+    asm volatile("movl %%ebx, %0":"=m"(p));
     parametresHW = (t_parametresHW *)p;
     maxmem = parametresHW->memorySize;
     maxmem = (maxmem*64+17472)*1024; // don`t know why
@@ -50,10 +53,10 @@ void _main(){
 
     vnode_t *script;
     script = vfindnode("/etc/init");
-    u1 *scriptdata = (u1*)kmalloc(script->length);
+    s1 *scriptdata = (s1*)kmalloc(script->length);
     vread(script, 0, script->length, scriptdata);
 
-    u8 index=0, j;
+    u8 index=0;
     while( (strlen(scriptdata+index)>0) && (index<script->length) ){
         printk_syslog("Executing: '");
         printk_syslog(scriptdata+index);

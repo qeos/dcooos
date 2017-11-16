@@ -5,6 +5,9 @@
 #include "../heap.h"
 #include "../paging.h"
 
+u1 paging_initialized = 0;
+memrec_t *memorymap;
+
 u8 *get_free_page_notmarked(u8 *pdir, u8 init_addr){
     u8 index = init_addr / PAGE_SIZE;
     while((memorymap[index].state != PS_FREE) && (memorymap[index].state != PS_NULL)){
@@ -107,11 +110,11 @@ u8 *copy_pdir(){
 void paging_callback(registers_t *reg){
 
     u8 cr2, cr3;
-    asm("movq %%cr2, %0":"=r"(cr2));    // access address / page fault linear address
-    asm("movq %%cr3, %0":"=r"(cr3));    // page directory
+    asm volatile("movq %%cr2, %0":"=r"(cr2));    // access address / page fault linear address
+    asm volatile("movq %%cr3, %0":"=r"(cr3));    // page directory
 
     // switch to kernel PD
-    asm("movq %0, %%cr3" :: "r" (tasks->pdir));
+    asm volatile("movq %0, %%cr3" :: "r" (tasks->pdir));
 
     if((cr2 < maxmem) && (memorymap[cr2/PAGE_SIZE].state == PS_FREE)){
         make_physical(cr3, cr2, cr2, PS_USED);
@@ -122,7 +125,7 @@ void paging_callback(registers_t *reg){
         u8 phisical = get_free_page(cr3,0);
     }
     // switch back to fault PD
-    asm("movq %0, %%cr3" :: "r" (cr3));
+    asm volatile("movq %0, %%cr3" :: "r" (cr3));
     return;
 
 }
@@ -338,7 +341,7 @@ void init_paging(){
     memset(memorymap, 0, sizeof(memrec_t)*size_pd);
 
     // set all memory as flat for kernal
-    u8 i, j;
+    u8 i;
     u8 line_addr = 0;
     u8 *pml4e = (u8*)KERNEL_PML4E;
     memset(pml4e, 0, PAGING_TABLE_SIZE);
@@ -386,8 +389,8 @@ void init_paging(){
     // set video memory
     //make_physical(KERNEL_PD, init_data.vba_lfb_address, init_data.vba_lfb_address, PS_VIDEO);
 
-    asm("movq %0, %%cr3" :: "r" ((u8)KERNEL_PML4E));
-    asm("movq %cr0, %rax\n\t"
+    asm volatile("movq %0, %%cr3" :: "r" ((u8)KERNEL_PML4E));
+    asm volatile("movq %cr0, %rax\n\t"
         "orl $0x80000000, %eax\n\t"
         "movq %rax, %cr0");
 

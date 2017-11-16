@@ -4,12 +4,18 @@
 #include "idt.h"
 #include "task.h"
 #include "objects.h"
+#include "file_formats.h"
+#include "strings.h"
 
 u8 tick=0;
 u8 tick_count=0;
 u8 next_pid=0;
+u8 ticks_per_process=1000;
 
-#define STACK_SIZE 1024*2
+task_t *current_task;
+task_t *tasks;
+
+//#define STACK_SIZE 1024*2
 #define BINARY_FILE_START   0x400000
 
 task_t* make_new_user_task(){
@@ -30,14 +36,14 @@ task_t* make_new_user_task(){
     new_task->pdir = copy_pdir();
     new_task->task_pdir = 0;
 
-
+    return new_task;
 }
 
 void exec(u1 *fname){
     vnode_t *file;// = (vnode_t*)kmalloc(sizeof(vnode_t));
     file = vfindnode(fname);
 
-    l3fs_file_pointer_t *inode = (l3fs_file_pointer_t*)file->inode;
+    //l3fs_file_pointer_t *inode = (l3fs_file_pointer_t*)file->inode;
 
     u1 *type = l3fs_get_param(file, "Type");
     if(type){
@@ -58,10 +64,10 @@ void exec(u1 *fname){
 
             // load file
             u8 old_pdir;
-            asm("movq %%cr3, %0" : "=r" (old_pdir));
-            asm("movq %0, %%cr3" :: "r" (pdir));
+            asm volatile("movq %%cr3, %0" : "=r" (old_pdir));
+            asm volatile("movq %0, %%cr3" :: "r" (pdir));
             vread(file, 0, file->length, BINARY_FILE_START+0x1000);
-            asm("movq %0, %%cr3" :: "r" (old_pdir));
+            asm volatile("movq %0, %%cr3" :: "r" (old_pdir));
 
             u1 *stack = (u1*)kmalloc(STACK_SIZE);
             new_task->stack.rsp = stack+STACK_SIZE-1;
@@ -71,7 +77,7 @@ void exec(u1 *fname){
             new_task->state = TS_NORMAL;
 
         }else if(strcmp(type, "CPE") == 0){
-            load_pe(file, new_task);
+            loading_pe_file(file, new_task);
         }
 
         kfree(type);
@@ -79,7 +85,7 @@ void exec(u1 *fname){
 
 }
 
-u8* s = 0x10000;
+u8* some_var = 0x10000;
 u1* screen;
 
 void putpoint(u8 pos, u1 r, u1 g, u1 b){
@@ -98,7 +104,7 @@ void putbigpoint(u8 pos, u1 r, u1 g, u1 b){
 void show_tasks_state(){
 
 
-    screen = s[0];
+    screen = some_var[0];
 
     if (screen !=0){
         task_t *taskm = tasks;
@@ -156,7 +162,7 @@ void switch_task(registers_t *regs){
     }while(true);
 
     if (new_task == current_task){
-/*        asm("movl %0, %%cr3" :: "r" (old_pdir));*/
+/*        asm volatile("movl %0, %%cr3" :: "r" (old_pdir));*/
         return;
     }
 #if DEBUG(E_NOTICE, ES_TASK)
@@ -243,7 +249,7 @@ void timer_callback(registers_t *regs){
     tick++;
     current_task->timer_tick++;
     if(tick > tick_count){
-        tick_count = tick + 10;
+        tick_count = tick + ticks_per_process;
         if(!clisti){
             switch_task(regs);
         }
@@ -259,7 +265,7 @@ u8 switch_pdir(u8 pdir){
 
     u8 old_pdir;
     asm volatile("movq %%cr3, %0" : "=r"(old_pdir));
-    asm("movq %0, %%cr3" :: "r" (pdir));
+    asm volatile("movq %0, %%cr3" :: "r" (pdir));
     current_task->pdir = pdir;
     STI
 
@@ -292,7 +298,7 @@ void sleep(u8 sleep_time){
 }
 
 u8 sleep_callback(GUID guid, u8 *params){
-    t_object *obj_d = obj_find(guid);
+//    t_object *obj_d = obj_find(guid);
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: Sleep to task ");
     printk_syslog_number(current_task->id,'d');
@@ -304,7 +310,6 @@ u8 sleep_callback(GUID guid, u8 *params){
 }
 
 u8 wait_callback(GUID guid, u8 *params){
-    t_object *obj_d = obj_find(guid);
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: Wait for task ");
     printk_syslog_number(current_task->id,'d');
@@ -319,7 +324,6 @@ u8 wait_callback(GUID guid, u8 *params){
 }
 
 u8 exit_callback(GUID guid, u8 *params){
-    t_object *obj_d = obj_find(guid);
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog("TASK: Exit for task ");
     printk_syslog_number(current_task->id,'d');
@@ -371,12 +375,12 @@ void init_task(){
     tasks->switch_count = 0;
     tasks->name = "KERNEL\0";
 
-    asm("movq %%cr3, %0" : "=r" (tasks->pdir));
+    asm volatile("movq %%cr3, %0" : "=r" (tasks->pdir));
     tasks->state = TS_NORMAL;
     tasks->next = 0;
 
     register_interrupt_handler(32, &timer_callback);
 
     printk_syslog("TASK init done.\n");
-    s[0] = 0;
+    some_var[0] = 0;
 }

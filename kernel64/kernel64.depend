@@ -1,17 +1,18 @@
 # depslib dependency file v1.0
 1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1509909567 source:d:\work\build\os\dcooos\kernel64\main.c
+1510787814 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 	"heap.h"
 	"vsys.h"
+	"strings.h"
 
-1507265396 d:\work\build\os\dcooos\kernel64\types.h
+1510775607 d:\work\build\os\dcooos\kernel64\types.h
 
 1483920373 d:\work\build\os\dcooos\kernel64\serial.h
 
-1507265396 source:d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
+1510685850 source:d:\work\build\os\dcooos\kernel64\system_ll\ioport.c
 	"../types.h"
 
 1507265396 source:d:\work\build\os\dcooos\kernel64\serial.c
@@ -19,42 +20,45 @@
 
 1483921882 d:\work\build\os\dcooos\kernel64\stringsprintk.h
 
-1508702467 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
+1510787814 source:d:\work\build\os\dcooos\kernel64\stringsprintk.c
 	"main.h"
 	"types.h"
 	"time.h"
 
-1509992449 d:\work\build\os\dcooos\kernel64\main.h
+1510851177 d:\work\build\os\dcooos\kernel64\main.h
 	"types.h"
 
-1508700523 source:d:\work\build\os\dcooos\kernel64\time.c
+1510851060 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
 	"types.h"
 	"time.h"
+	"strings.h"
+	"ioport.h"
 
-1507265396 d:\work\build\os\dcooos\kernel64\time.h
+1510848913 d:\work\build\os\dcooos\kernel64\time.h
 
-1509873795 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
+1510786351 source:d:\work\build\os\dcooos\kernel64\system_ll\idt.c
 	"../types.h"
 	"../idt.h"
 	"../main.h"
 	"../task.h"
 
-1508700523 source:d:\work\build\os\dcooos\kernel64\strings.c
+1510777045 source:d:\work\build\os\dcooos\kernel64\strings.c
 	"types.h"
+	"strings.h"
 
-1509646977 d:\work\build\os\dcooos\kernel64\idt.h
+1510786371 d:\work\build\os\dcooos\kernel64\idt.h
 
 1509598158 source:d:\work\build\os\dcooos\kernel64\system_ll\interrupt.s
 
-1509565152 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
+1510785459 source:d:\work\build\os\dcooos\kernel64\system_ll\heap.c
 	"../main.h"
 	"../types.h"
 	"../heap.h"
 
-1508265915 d:\work\build\os\dcooos\kernel64\heap.h
+1510785459 d:\work\build\os\dcooos\kernel64\heap.h
 
-1509565660 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
+1510777545 source:d:\work\build\os\dcooos\kernel64\system_ll\heap_as_array.c
 	"../types.h"
 	"../main.h"
 
@@ -64,15 +68,17 @@
 	"../heap.h"
 	"../idt.h"
 
-1509992590 source:d:\work\build\os\dcooos\kernel64\task.c
+1510787814 source:d:\work\build\os\dcooos\kernel64\task.c
 	"types.h"
 	"main.h"
 	"vsys.h"
 	"idt.h"
 	"task.h"
 	"objects.h"
+	"file_formats.h"
+	"strings.h"
 
-1509910542 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
+1510787815 source:d:\work\build\os\dcooos\kernel64\system_ll\paging.c
 	"../types.h"
 	"../main.h"
 	"../idt.h"
@@ -80,51 +86,57 @@
 	"../heap.h"
 	"../paging.h"
 
-1508700523 d:\work\build\os\dcooos\kernel64\task.h
+1510783760 d:\work\build\os\dcooos\kernel64\task.h
 	"objects.h"
 	"idt.h"
 
-1509389229 source:d:\work\build\os\dcooos\kernel64\drivers\hdd.c
+1510774156 source:d:\work\build\os\dcooos\kernel64\drivers\hdd.c
 	"../main.h"
 	"../types.h"
 	"../idt.h"
+	"../ioport.h"
+	"../strings.h"
 
-1509476691 source:d:\work\build\os\dcooos\kernel64\drivers\l3fs.c
+1510786811 source:d:\work\build\os\dcooos\kernel64\drivers\l3fs.c
 	"../types.h"
 	"../main.h"
 	"../vsys.h"
+	"../strings.h"
 
-1508273282 d:\work\build\os\dcooos\kernel64\vsys.h
+1510775132 d:\work\build\os\dcooos\kernel64\vsys.h
 
-1508273282 source:d:\work\build\os\dcooos\kernel64\drivers\vsys.c
+1510776621 source:d:\work\build\os\dcooos\kernel64\drivers\vsys.c
 	"../types.h"
 	"../vsys.h"
+	"../strings.h"
 
-1509993305 source:d:\work\build\os\dcooos\kernel64\objects.c
+1510787814 source:d:\work\build\os\dcooos\kernel64\objects.c
 	"main.h"
 	"types.h"
 	"objects.h"
 	"task.h"
 	"idt.h"
+	"strings.h"
 
-1509890319 d:\work\build\os\dcooos\kernel64\objects.h
-	"task.h"
+1510786303 d:\work\build\os\dcooos\kernel64\objects.h
 
-1509890475 source:d:\work\build\os\dcooos\kernel64\syscall.c
+1510777045 source:d:\work\build\os\dcooos\kernel64\syscall.c
 	"types.h"
 	"main.h"
 	"idt.h"
 	"task.h"
 	"objects.h"
+	"strings.h"
 
-1509916007 source:d:\work\build\os\dcooos\kernel64\object_memory.c
+1510777045 source:d:\work\build\os\dcooos\kernel64\object_memory.c
 	"types.h"
 	"objects.h"
 	"task.h"
 	"heap.h"
 	"main.h"
+	"strings.h"
 
-1508700523 source:d:\work\build\os\dcooos\kernel64\object_log.c
+1510606807 source:d:\work\build\os\dcooos\kernel64\object_log.c
 	"types.h"
 	"objects.h"
 
@@ -133,23 +145,33 @@
 	"objects.h"
 	"vsys.h"
 
-1508700523 source:d:\work\build\os\dcooos\kernel64\object_keyboard.c
+1510777481 source:d:\work\build\os\dcooos\kernel64\object_keyboard.c
 	"types.h"
 	"objects.h"
 	"task.h"
 	"idt.h"
 	"syscall.h"
+	"strings.h"
 
-1508700523 d:\work\build\os\dcooos\kernel64\syscall.h
+1510785605 d:\work\build\os\dcooos\kernel64\syscall.h
 
-1508700523 source:d:\work\build\os\dcooos\kernel64\str_utils.c
+1510777045 source:d:\work\build\os\dcooos\kernel64\str_utils.c
 	"types.h"
+	"strings.h"
 
-1509567901 source:d:\work\build\os\dcooos\kernel64\file_formats.c
+1510788008 source:d:\work\build\os\dcooos\kernel64\file_formats.c
 	"types.h"
 	"main.h"
 	"vsys.h"
 	"task.h"
+	"strings.h"
+	"file_formats.h"
 
-1509479377 d:\work\build\os\dcooos\kernel64\paging.h
+1510785605 d:\work\build\os\dcooos\kernel64\paging.h
+
+1510787814 d:\work\build\os\dcooos\kernel64\file_formats.h
+
+1510785605 d:\work\build\os\dcooos\kernel64\ioport.h
+
+1510785605 d:\work\build\os\dcooos\kernel64\strings.h
 

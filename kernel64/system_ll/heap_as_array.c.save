@@ -40,7 +40,7 @@ void HAA_mark_record(u8 ptr, u8 size, u1 state){
     }
 }
 
-u8 HAA_kmalloc(u8 len, u8 align){
+pointer HAA_kmalloc(u8 len, u8 align){
     u8 ipos;
     u8 needBlocks = len / HAA_BLOCK_SIZE;
     if(len % HAA_BLOCK_SIZE != 0){
@@ -49,8 +49,8 @@ u8 HAA_kmalloc(u8 len, u8 align){
     u8 iipos;
     u8 canUse;
     for(ipos = 0; ipos<=KERNEL_HEAP_SIZE/HAA_BLOCK_SIZE; ipos++){
-        if(ipos % align != 0) con
-            
+        if((align != 0) && (ipos*HAA_BLOCK_SIZE % align != 0)) continue;
+
         if(HAA_table[ipos].state == HAA_STATE_FREE){
             canUse = -1;
             iipos = needBlocks;

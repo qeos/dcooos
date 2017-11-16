@@ -2,7 +2,9 @@
 #include "../types.h"
 #include "../heap.h"
 
-u8 kmalloc_aligned(u8 len, u8 align){
+u8 maxmem;
+
+pointer kmalloc_aligned(u8 len, u8 align){
 
 #ifdef HEAP_MOD_HAT
     return HAT_kmalloc(len, align);
@@ -14,13 +16,13 @@ u8 kmalloc_aligned(u8 len, u8 align){
 
 }
 
-u8 kmalloc(u8 len){
+pointer kmalloc(u8 len){
 
     return kmalloc_aligned(len, 0);
 
 }
 
-void kfree(u8 ptr){
+void kfree(pointer ptr){
 
 #ifdef HEAP_MOD_HAT
     HAT_kfree(ptr);

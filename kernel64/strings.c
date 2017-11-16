@@ -1,26 +1,27 @@
 #include "types.h"
+#include "strings.h"
 
 // Copy len bytes from src to dest.
-void memcpy(u1 *dest, const u1 *src, u8 len)
+void memcpy(s1 *dest, const s1 *src, u8 len)
 {
-    u1 *tmp = dest;
-    const u1 *s = src;
+    s1 *tmp = dest;
+    const s1 *some_var = src;
 
     while(len--)
-        *tmp++ = *s++;
+        *tmp++ = *some_var++;
 }
 
 // Write len copies of val into dest.
-void memset(u1 *dest, u1 val, u8 len)
+void memset(s1 *dest, s1 val, u8 len)
 {
-    u1 *xs = dest;
+    s1 *xs = dest;
     while(len--)
         *xs++ = val;
 }
 
 // Compare two strings. Should return -1 if
 // str1 < str2, 0 if they are equal or 1 otherwise.
-u8 strcmp(u1 *str1, u1 *str2)
+u8 strcmp(s1 *str1, s1 *str2)
 {
       u8 i = 0;
       u8 failed = 0;
@@ -41,7 +42,7 @@ u8 strcmp(u1 *str1, u1 *str2)
 }
 // Copy the NULL-terminated string src into dest, and
 // return dest.
-u1 *strcpy(u1 *dest, const u1 *src)
+s1 *strcpy(s1 *dest, const s1 *src)
 {
     do
     {
@@ -52,7 +53,7 @@ u1 *strcpy(u1 *dest, const u1 *src)
 }
 // Copy the NULL-terminated string src into dest, and
 // return dest.
-u1 *strncpy(u1 *dest, const u1 *src, u8 len)
+s1 *strncpy(s1 *dest, const s1 *src, u8 len)
 {
     int i=len-1;
     while(i>=0){
@@ -62,7 +63,7 @@ u1 *strncpy(u1 *dest, const u1 *src, u8 len)
 }
 // Concatenate the NULL-terminated string src onto
 // the end of dest, and return dest.
-u1 *strcat(u1 *dest, const u1 *src)
+s1 *strcat(s1 *dest, const s1 *src)
 {
     while (*dest != 0)
     {
@@ -77,7 +78,7 @@ u1 *strcat(u1 *dest, const u1 *src)
     return dest;
 }
 // Search first position of char in string
-u8 strchr(u1 *str, u1 ch)
+u8 strchr(s1 *str, s1 ch)
 {
     u8 i=0;
     while(str[i]!=0){
@@ -89,7 +90,7 @@ u8 strchr(u1 *str, u1 ch)
     return 0;
 }
 
-u8 strlen(u1 *src)
+u8 strlen(s1 *src)
 {
     u8 i = 0;
     while (*src++)
@@ -97,7 +98,7 @@ u8 strlen(u1 *src)
     return i;
 }
 
-u8 str2int(u1 *str){
+u8 str2int(s1 *str){
     int i=0;
     u8 j=0, k=1;
     while( ((str[i]>='0') && (str[i]<='9')) ){
@@ -113,7 +114,7 @@ u8 str2int(u1 *str){
 }
 
 
-u8 str2hex(u1 *str){
+u8 str2hex(s1 *str){
     int i=0;
     u8 j=0, k=1;
     while( ((str[i]>='0') && (str[i]<='9')) || ((str[i]>='a') && (str[i]<='f')) || ((str[i]>='A') && (str[i]<='F')) ){

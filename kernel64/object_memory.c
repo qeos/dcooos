@@ -3,18 +3,19 @@
 #include "task.h"
 #include "heap.h"
 #include "main.h"
+#include "strings.h"
 
 // heap data from USER_HEAP to USER_HEAP+USER_HEAP_SIZE
 #define USER_HEAP   0x4000000
 #define USER_HEAP_SIZE  0x1000000
 
 u8 kfree_callback(GUID guid, u8 *params){
-    u1 *s = params[2];
+    u1 *some_var = params[2];
     u8 pointer_to_mem;
-    if (s[0] == '$'){
-        pointer_to_mem = obj_property_get_value_u8(guid, s+1);
+    if (some_var[0] == '$'){
+        pointer_to_mem = obj_property_get_value_u8(guid, some_var+1);
     }else{
-        pointer_to_mem = str2int(s);
+        pointer_to_mem = str2int(some_var);
     }
 
     kfree(pointer_to_mem);
@@ -25,12 +26,12 @@ u8 kfree_callback(GUID guid, u8 *params){
 
 u8 kmalloc_callback(GUID guid, u8 *params){
 
-    u1 *s = params[2];
+    u1 *some_var = params[2];
     u8 size;
-    if (s[0] == '$'){
-        size = obj_property_get_value_u8(guid, s+1);
+    if (some_var[0] == '$'){
+        size = obj_property_get_value_u8(guid, some_var+1);
     }else{
-        size = str2int(s);
+        size = str2int(some_var);
     }
 
     t_object *obj_c = obj_find(guid);
@@ -78,13 +79,13 @@ u8 require_video_memory(GUID guid, u8 *params){
     // need to switch to kernel PD
     u8 old_pdir;
     // switch to kernel PD
-    asm("movq %%cr3, %0" : "=r" (old_pdir));
-    asm("movq %0, %%cr3" :: "r" (tasks->pdir));
+    asm volatile("movq %%cr3, %0" : "=r" (old_pdir));
+    asm volatile("movq %0, %%cr3" :: "r" (tasks->pdir));
 
     make_physical_sized(old_pdir, start, start, size, PS_VIDEO);
 
     // switch back to fault PD
-    asm("movq %0, %%cr3" :: "r" (old_pdir));
+    asm volatile("movq %0, %%cr3" :: "r" (old_pdir));
 
 //    paging_print_pdir(tasks->pdir);
 

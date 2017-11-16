@@ -1,7 +1,7 @@
 #ifndef OBJECTS_H_INCLUDED
 #define OBJECTS_H_INCLUDED
 
-#include "task.h"
+//#include "task.h"
 
 // GUID
 typedef struct {
@@ -13,6 +13,8 @@ typedef struct {
 } GUID;
 
 GUID str2GUID(u1 *guid);
+
+extern GUID EmptyGUID;
 
 // Objects
 
@@ -82,7 +84,8 @@ t_object *objects_main_tree;
 #define _OBJ_INIT_GLOBAL(baseobject, objname)\
     objname = syscall(baseobject, "find_object " #objname "");
 
-#define _OBJ_CALL(object, str) object ? syscall(object, str) : 0;
+//#define _OBJ_CALL(object, str) object ? syscall(object, str) : 0;
+#define _OBJ_CALL(object, str) syscall(object, str);
 
 #define _OBJ_NEW_PROPERTY_U8(object, propname)\
     u8 *object##_##propname = _OBJ_CALL(object, "new_property " #propname " 8")
@@ -96,6 +99,6 @@ t_object *objects_main_tree;
 #define _OBJ_SET_PROPERTY_U8(object, propname, val)\
     object##_##propname[0] = val;
 
-GUID obj_create(u1 *name, GUID classof);
+GUID obj_create(s1 *name, GUID classof);
 
 #endif // OBJECTS_H_INCLUDED

@@ -5,12 +5,12 @@ struct vnode;
 
 // These typedefs define the type of callbacks - called when read/write/open/close
 // are called.
+typedef struct fs_node * (*finddir_type_t)(struct fs_node*,char *name);
 typedef u4 (*read_type_t)(struct fs_node*,u4,u4,u1*);
 typedef u4 (*write_type_t)(struct fs_node*,u4,u4,u1*);
 typedef void (*open_type_t)(struct fs_node*);
 typedef void (*close_type_t)(struct fs_node*);
 typedef u1 * (*readdir_type_t)(struct fs_node*,u4,u1*);
-typedef struct fs_node * (*finddir_type_t)(struct fs_node*,char *name);
 typedef u1 (*fs_get_param)(struct fs_node*, u1*, u1*);
 
 typedef struct vnode

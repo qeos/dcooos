@@ -2,7 +2,7 @@
 #include "types.h"
 #include "time.h"
 
-void printk_syslog(u1 *text){
+void printk_syslog(s1 *text){
     int i=0;
     u8 j=0;
 
@@ -11,17 +11,17 @@ void printk_syslog(u1 *text){
         i++;
         // need pause for com buffers to be free
         for(j=0;j<1000;j++){
-            asm("nop");
+            asm volatile("nop");
         }
     }
 
 }
 
-u1 *kbuf_number = "###############################";
+s1 *kbuf_number = "###############################";
 
 void printk_syslog_number(const u8 n, u1 type){
     u8 i=30;
-    u1 *hh = "0123456789ABCDEF";
+    s1 *hh = "0123456789ABCDEF";
     u8 nn=n;
     kbuf_number[i+1]=0;
 
@@ -51,12 +51,12 @@ void printk_syslog_number(const u8 n, u1 type){
     printk_syslog(&kbuf_number[i+1]);
 }
 
-u1 *kbuf_numberInFormat = "################################";
+s1 *kbuf_numberInFormat = "################################";
 int kbuf_numberInFormatLen = 30;
 
-u1 *sprintk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
-    u8 i=kbuf_numberInFormatLen, j=0;
-    u1 *hh = "0123456789ABCDEF";
+s1 *sprintk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
+    u8 i=kbuf_numberInFormatLen;
+    s1 *hh = "0123456789ABCDEF";
     u8 nn=n;
     kbuf_numberInFormat[i+1]=0;
 

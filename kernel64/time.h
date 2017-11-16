@@ -2,8 +2,7 @@
 #define TIME_H_INCLUDED
 
 typedef struct time{
-    u4 lo_tick;
-    u4 hi_tick;
+    u8 gticks;
     u1 seconds;
     u1 minutes;
     u1 hours;
@@ -15,6 +14,6 @@ typedef struct time{
 #define RTCaddress  0x70
 #define RTCdata     0x71
 
-t_time startupTime;
+static t_time startupTime;
 
 #endif // TIME_H_INCLUDED

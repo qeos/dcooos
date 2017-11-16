@@ -35,8 +35,10 @@ typedef struct task{
 
 }task_t;
 
-task_t *current_task;
-task_t *tasks;
+extern task_t *current_task;
+extern task_t *tasks;
+
+extern u8 ticks_per_process;
 
 void sleep();
 

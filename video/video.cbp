@@ -13,11 +13,11 @@
 				<Option compiler="mingw_x64" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-ggdb" />
+					<Add option="-ffreestanding -ggdb" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-nostdlib" />
+					<Add option="-nostdlib  -fno-stack-protector -Wl,-Map=kernel.map" />
 				</Linker>
 			</Target>
 		</Build>
