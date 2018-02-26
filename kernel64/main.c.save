@@ -20,6 +20,11 @@ void _main(){
     // init serial
     init_serial();
 
+    printk_syslog("Video mode: ");
+    printk_syslog_number(parametresHW->VBEResX, 'd');
+    printk_syslog("x");
+    printk_syslog_number(parametresHW->VBEResY, 'd');
+    printk_syslog("\n");
     printk_syslog("VESA lfb: ");
     printk_syslog_numberInFormat(parametresHW->VBElfb, 'h', 8);
     printk_syslog("\n");

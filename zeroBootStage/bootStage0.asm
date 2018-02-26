@@ -1,6 +1,7 @@
 ;*********************************************
 ; for first iteration we use VM, so we have and been use VESA mode without check it
 ;*********************************************
+[map all bootStage.map]
 
 %define BOOT_SEGMENT    0x07c0
 %define DEF_INITSEG     0x0800

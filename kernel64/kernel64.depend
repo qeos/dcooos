@@ -1,7 +1,7 @@
 # depslib dependency file v1.0
 1507265396 source:d:\work\build\os\dcooos\kernel64\_bootstrap.c
 
-1510787814 source:d:\work\build\os\dcooos\kernel64\main.c
+1510862361 source:d:\work\build\os\dcooos\kernel64\main.c
 	"main.h"
 	"types.h"
 	"heap.h"
@@ -28,7 +28,7 @@
 1510851177 d:\work\build\os\dcooos\kernel64\main.h
 	"types.h"
 
-1510851060 source:d:\work\build\os\dcooos\kernel64\time.c
+1510852921 source:d:\work\build\os\dcooos\kernel64\time.c
 	"main.h"
 	"types.h"
 	"time.h"

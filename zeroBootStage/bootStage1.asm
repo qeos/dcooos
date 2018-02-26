@@ -15,7 +15,7 @@
 ;   0x00008200 - 0x00008400 - 0x200     - continued boot code
 ;
 ;   0x00009000 - 0x00009200 - 0x200     - super block
-;              - 0x0000ffff             - stack
+;              - 0x00018000             - stack
 ;   0x00010000 - 0x00020000 - 0x5a00    - allocation table
 ;   0x00020000 - 0x00025000 - 0x5000    - kernel stack
 ;   0x00025000 - 0x00050000 - 0x25000   - kernel code
@@ -65,16 +65,33 @@ wwloop:
     pop dx
     ret
 
-waitingFunction:
-    mov si, waitString
-waiting:
+; SI = pointer to string
+printFunction:
+    push ax
+    push bx
+.printLoop:
     mov ah, 0x0e
     mov bl, 0x47
     mov al, [si]
     int 0x10
     inc si
     cmp byte [si], 0
-    jne waiting
+    jne .printLoop
+    pop bx
+    pop ax
+    ret
+
+waitingFunction:
+    mov si, waitString
+;waiting:
+;    mov ah, 0x0e
+;    mov bl, 0x47
+;    mov al, [si]
+;    int 0x10
+;    inc si
+;    cmp byte [si], 0
+;    jne waiting
+    call printFunction
     mov cx, 0x5
     push cx
 wkey:
@@ -290,13 +307,15 @@ loadBlockCount:
 ; -------------------------------------------------------
 ; parameters from real mode calls
 ; -------------------------------------------------------
+align 4
 parametresHW:
     .bootDrive dd 0
     .memorySize dd 0
     .vbeLfb dd 0
     .vbeX dd 800
     .vbeY dd 600
-    .vbeBPP dd 16
+    .vbeBPP dd 32
+    .vbeParams dd 6
 errorString4 db 'bootStage1: VESA fail.',0
 
 nearJump:
@@ -341,6 +360,39 @@ ModeInfo times 256 db 0
 i dw 0
 errorString5 db 'bootStage1: VESA no compatible video mode.',0
 
+; eax = pointer to number
+printFuntionNumber:
+    push edi
+    push ebx
+    push eax
+    push edx
+    mov edi, 10
+    mov ebx, 10
+.nextDigit:
+    mov edx, 0
+    div ebx
+    add dl, '0'
+    mov byte [.printedValue+di], dl
+    dec edi
+    cmp eax, 0
+    jne .nextDigit
+.outDigits:
+    mov esi, .printedValue
+    add esi, edi
+    inc esi
+    call printFunction
+    pop edx
+    pop eax
+    pop ebx
+    pop edi
+    ret
+.printedValue db '00000000000',0
+
+sMode db 'Mode: ',0
+sMode1 db ': ',0
+sMode2 db 'x',0
+sMode3 db '',13,10,0
+
 videoSet:
 ; -------------------------------------------------------
 ; Set video mode
@@ -355,6 +407,9 @@ videoSet:
     mov cx, [VBEInfo+16]
     mov fs, cx
 
+    mov esi, sMode3
+    call printFunction
+
 .loopModes:
 
     ; get mode information
@@ -368,6 +423,7 @@ videoSet:
     shl cx, 1
     add si, cx
     mov cx, [fs:si]
+    push cx
     cmp cx, 0xffff
     mov si, errorString5
     je fail
@@ -375,18 +431,48 @@ videoSet:
 
     inc word [i]
 
+    xor eax, eax
+    mov esi, sMode
+    call printFunction
+    mov ax, word [i]
+    call printFuntionNumber
+    mov esi, sMode1
+    call printFunction
+    pop ax
+    call printFuntionNumber
+    mov esi, sMode1
+    call printFunction
+    mov ax, word [ModeInfo+18]
+    call printFuntionNumber
+    mov esi, sMode2
+    call printFunction
+    mov ax, word [ModeInfo+20]
+    call printFuntionNumber
+    mov esi, sMode2
+    call printFunction
+    xor eax, eax
+    mov al, byte [ModeInfo+25]
+    call printFuntionNumber
+    mov esi, sMode2
+    call printFunction
+    mov al, byte [ModeInfo+27]
+    call printFuntionNumber
+    mov esi, sMode3
+    call printFunction
+
+
     ; check res
     mov cx, [ModeInfo+18]
-    cmp cx, 800
+    cmp cx, word [parametresHW.vbeX]
     jne .loopModes
     mov dx, [ModeInfo+20]
-    cmp dx, 600
+    cmp dx, word [parametresHW.vbeY]
     jne .loopModes
     mov bl, [ModeInfo+25]
-    cmp bl, 16  ; bits per pixel
+    cmp bl, byte [parametresHW.vbeBPP]  ; bits per pixel
     jne .loopModes
     mov bh, [ModeInfo+27]
-    cmp bh, 6   ; memory model
+    cmp bh, byte [parametresHW.vbeParams]   ; memory model
     jne .loopModes
 
     mov cx, [ModeInfo+40]

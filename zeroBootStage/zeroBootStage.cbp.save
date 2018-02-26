@@ -14,6 +14,9 @@
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
+				<Linker>
+					<Add option="-Wl,-Map=kernel.map" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1510853838 source:d:\work\build\os\dcooos\video\video.c
+1510863640 source:d:\work\build\os\dcooos\video\video.c
 	"../kernel64/types.h"
 	"../kernel64/main.h"
 	"../kernel64/syscall.h"

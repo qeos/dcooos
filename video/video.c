@@ -6,10 +6,9 @@
 #include "../kernel64/system_ll/ioport.c"
 #include "video.h"
 
-#define COLOR_TYPE_565
 #define WIDTH 800
 #define HEIGHT 600
-#define BPP 2
+#define BPP 4
 
 #define DEBUG_VIDEO
 
@@ -168,14 +167,22 @@ void put_line(u8 x1,u8 y1,u8 x2,u8 y2,t_color nState)
     return;
 }
 
-#ifdef COLOR_TYPE_565
 #if BPP == 2
 
 #define SET_RGB(_t_color_var, R, G, B)\
     _t_color_var.rgb[0] = (u1*)(((R & 0xf8) << 0x08) | ((G & 0xfc) << 5) | (B >> 3));
 
+#elif BPP == 3
+
+#define SET_RGB(_t_color_var, R, G, B)\
+    _t_color_var.rgb[0] = (u1*)((R<<16) | (G<<8) | (B));
+
+#elif BPP == 4
+
+#define SET_RGB(_t_color_var, R, G, B)\
+    _t_color_var.rgb[0] = (u1*)((R<<16) | (G<<8) | (B));
+
 #endif // BPP
-#endif // COLOR_TYPE_565
 
 void put_char(u8 x, u8 y, u1 s){
     t_color textcolor;
@@ -400,7 +407,7 @@ void initialize_object(){
 #endif // DEBUG_VIDEO
     _OBJ_INIT_GLOBAL(0,memory);
     _OBJ_NEW_PROPERTY_U8_GLOBAL(memory, req_mem);
-    _OBJ_SET_PROPERTY_U8(memory, req_mem, 1024*768*3*3);
+    _OBJ_SET_PROPERTY_U8(memory, req_mem, WIDTH*HEIGHT*BPP+100);
 
     vbe_lfb = _OBJ_CALL(memory, "get_video_mem $req_mem");
     //mtmp[0] = WIDTH*HEIGHT*BPP+100;
@@ -424,15 +431,23 @@ void initialize_object(){
     u8* s = 0x10000;
     s[0] = video_buffer;
 
+//    video_buffer = vbe_lfb;
+//    t_color c;
+//    SET_RGB(c, 0xff, 0x00, 0x00);
+//    put_line(0,0,800,600, c);
+////    show_video_buffer();
+//HLT;
+
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: printing hello message\"");
 #endif // DEBUG_VIDEO
     put_string("PIXITALIPHINA Operation system (c) 2009-2016\n\r");
-    t_color col = {0x00,0x00,0xff};
+    t_color col;
+    SET_RGB(col, 0xff,0xff,0x00);
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: draw some elements\"");
 #endif // DEBUG_VIDEO
-    put_line(0,14,800,14,col);
+    put_line(0,14,WIDTH,14,col);
 
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: print test number 12345678\"");
@@ -500,7 +515,9 @@ void initialize_object(){
     _OBJ_SET_PROPERTY_U8(memory, req_mem, sizeoffile);
     u1 *mem = _OBJ_CALL(memory, "malloc $req_mem");
 
-    put_box(0,0,100,100,(t_color){255,55,25});
+    t_color ccc;
+    SET_RGB(ccc, 255,55,25);
+    put_box(0,0,100,100,ccc);
     //copy_rect(dst, mem, dst, video_buffer);
 
     _OBJ_INIT(0, system);
