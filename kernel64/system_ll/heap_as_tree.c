@@ -177,5 +177,6 @@ void HAT_init_heap(){
     printk_syslog_number(HAT_current_heap_size/1024, 'd');
     printk_syslog(" Kb of heap\n");
 
-    printk_syslog("HEAP init done.\n");
+    printk_syslog_timestamp();
+    printk_syslog("HEAP (as tree) init done.\n");
 }

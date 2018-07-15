@@ -13,6 +13,7 @@
 #define E_ALL       (E_ERROR | E_WARNING | E_NOTICE)
 #define DEBUG_LEVEL E_ALL
 
+#define ES_ALL          0xFFFF
 #define ES_IDT          0x0001
 #define ES_HEAP         0x0002
 #define ES_PAGING       0x0004
@@ -24,8 +25,9 @@
 #define ES_OBJECTS      0x0100
 #define ES_OBJECT_MEM   0x0200
 #define ES_TIME         0x0400
+#define ES_TIMESTAMP    0x0800
 #define ES_SYSCALL      0x1000
-#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_SYSCALL | ES_TIME)
+#define DEBUG_SYSTEMS   (ES_HEAP | ES_PAGING | ES_FILEFORMATS | ES_SYSCALL | ES_TIME | ES_TIMESTAMP | ES_OBJECT_MEM | ES_OBJECTS)
 
 //#define DEBUG(level)   (DEBUG_LEVEL & level == level)
 //#define DEBUG(level, system)   ((DEBUG_LEVEL && level == level) && (DEBUG_SYSTEMS && system == system))
@@ -36,6 +38,12 @@
 #define KERNEL_HEAP_SIZE    0x2000000
 
 #define MINIMAL_MEMORY      KERNEL_HEAP+KERNEL_HEAP_SIZE
+
+/*// heap data from USER_HEAP to USER_HEAP+USER_HEAP_SIZE
+#define USER_HEAP   0x4000000
+#define USER_HEAP_SIZE  0x1000000
+*/
+#define USER_CODE   0x4000000
 
 //#define PAGE_SIZE 0x1000
 #define PAGE_SIZE 0x200000
@@ -59,7 +67,7 @@
 #define PE_PAGE_SIZE_4M    0x80
 
 //#define HLT while(1){asm("hlt");};
-#define HLT while(1){;};
+#define HLT while(1){asm("nop");};
 
 typedef struct{
     u4 bootDrive;

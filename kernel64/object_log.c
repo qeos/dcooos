@@ -6,6 +6,7 @@ void print_callback(GUID guid, u8 *params){
     if (val[0] == '$'){
         val = obj_property_get_value_u8(guid, val+1);
     }
+    printk_syslog_timestamp();
     printk_syslog("SYSLOG: '");
     printk_syslog(val);
     printk_syslog("'\n");

@@ -9,11 +9,20 @@ u1 paging_initialized = 0;
 memrec_t *memorymap;
 
 u8 *get_free_page_notmarked(u8 *pdir, u8 init_addr){
+#if DEBUG(E_NOTICE, ES_PAGING)
+    printk_syslog_timestamp();
+    printk_syslog("PAGING: get_free_page_notmarked(0x");
+    printk_syslog_number(pdir, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(init_addr, 'h');
+    printk_syslog(")\n");
+#endif // DEBUG
     u8 index = init_addr / PAGE_SIZE;
     while((memorymap[index].state != PS_FREE) && (memorymap[index].state != PS_NULL)){
         index++;
         if (index > maxmem /PAGE_SIZE){
-            printk_syslog_number("PAGING: No free mem pages. We need caching.\n");
+            printk_syslog_timestamp();
+            printk_syslog("PAGING: No free mem pages. We need caching.\n");
             show_map();
             current_task->state = TS_CRASH;
             HLT;
@@ -23,6 +32,15 @@ u8 *get_free_page_notmarked(u8 *pdir, u8 init_addr){
 }
 
 u8 *get_free_page(u8 *pdir, u8 init_addr){
+#if DEBUG(E_NOTICE, ES_PAGING)
+    printk_syslog_timestamp();
+    printk_syslog("PAGING: get_free_page(0x");
+    printk_syslog_number(pdir, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(init_addr, 'h');
+    printk_syslog(")\n");
+#endif // DEBUG
+
     u8 mempos = get_free_page_notmarked(pdir, init_addr);
 
     make_physical(pdir, init_addr, mempos*PAGE_SIZE, PS_USED);
@@ -35,15 +53,16 @@ void mark_memory_page(u8 *pdir, u8 paddr_index, u1 state){
         memorymap[paddr_index].pdir = pdir;
         memorymap[paddr_index].state = state;
     }else{
+        printk_syslog_timestamp();
         printk_syslog("PAGING: Used page for address ");
         printk_syslog_number(paddr_index*PAGE_SIZE,'h');
         printk_syslog(" in memorymap[");
         printk_syslog_number(paddr_index,'h');
         printk_syslog("] = { state:");
         switch(memorymap[paddr_index].state){
+            case PS_NULL:   printk_syslog("PS_NULL");    break;
             case PS_FREE:   printk_syslog("PS_FREE");    break;
             case PS_KERNEL: printk_syslog("PS_KERNEL");  break;
-            case PS_NULL:   printk_syslog("PS_NULL");    break;
             case PS_USED:   printk_syslog("PS_USED");    break;
             case PS_USER:   printk_syslog("PS_USER");    break;
             case PS_VIDEO:  printk_syslog("PS_VIDEO");   break;
@@ -116,11 +135,18 @@ void paging_callback(registers_t *reg){
     // switch to kernel PD
     asm volatile("movq %0, %%cr3" :: "r" (tasks->pdir));
 
-    if((cr2 < maxmem) && (memorymap[cr2/PAGE_SIZE].state == PS_FREE)){
-        make_physical(cr3, cr2, cr2, PS_USED);
-    }else if(memorymap[cr2/PAGE_SIZE].state == PS_VIDEO){
+#if DEBUG(E_NOTICE, ES_PAGING)
+    printk_syslog_timestamp();
+    printk_syslog("PAGING: paging_callback(0x");
+    printk_syslog_number(reg->rip, 'h');
+    printk_syslog(")\n");
+#endif // DEBUG
+
+    if(memorymap[cr2/PAGE_SIZE].state == PS_VIDEO){
         make_physical(cr3, cr2, cr2, PS_VIDEO);
-        paging_print_pdir(current_task->pdir);
+        //paging_print_pdir(current_task->pdir);
+    }else if((cr2 < maxmem) && (memorymap[cr2/PAGE_SIZE].state == PS_FREE)){
+        make_physical(cr3, cr2, cr2, PS_USED);
     }else{
         u8 phisical = get_free_page(cr3,0);
     }
@@ -131,6 +157,18 @@ void paging_callback(registers_t *reg){
 }
 
 void make_physical(u8 *pdir, u8 log_addr, u8 phys_addr, u1 need_markup){
+#if DEBUG(E_NOTICE, ES_PAGING)
+    printk_syslog_timestamp();
+    printk_syslog("PAGING: make_physical(0x");
+    printk_syslog_number(pdir, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(log_addr, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(phys_addr, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(need_markup, 'h');
+    printk_syslog(")\n");
+#endif // DEBUG
     if((need_markup != 0) && (need_markup != PS_VIDEO)){
         mark_memory_page(pdir, phys_addr/PAGE_SIZE, need_markup);
     }
@@ -168,6 +206,20 @@ void make_physical(u8 *pdir, u8 log_addr, u8 phys_addr, u1 need_markup){
 }
 
 void make_physical_sized(u8 *pdir, u8 log_addr, u8 phys_addr, u8 size_addr, u1 need_markup){
+#if DEBUG(E_NOTICE, ES_PAGING)
+    printk_syslog_timestamp();
+    printk_syslog("PAGING: make_physical_sized(0x");
+    printk_syslog_number(pdir, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(log_addr, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(phys_addr, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(size_addr, 'h');
+    printk_syslog(", 0x");
+    printk_syslog_number(need_markup, 'h');
+    printk_syslog(")\n");
+#endif // DEBUG
     u8 pmemblock = phys_addr;
     u8 memblock = log_addr; // -page_size becose we need stack
     while (memblock < log_addr + size_addr){
@@ -179,6 +231,7 @@ void make_physical_sized(u8 *pdir, u8 log_addr, u8 phys_addr, u8 size_addr, u1 n
 
 void show_map(){
     u8 i,j = 0;
+    printk_syslog_timestamp();
     printk_syslog("PAGING: show memory map size: ");
     printk_syslog_number(maxmem, 'h');
     printk_syslog("\n");
@@ -396,5 +449,6 @@ void init_paging(){
 
     paging_initialized = -1;
 
+    printk_syslog_timestamp();
     printk_syslog("PAGING init: done.\n");
 }

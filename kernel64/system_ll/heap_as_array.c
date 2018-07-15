@@ -95,4 +95,6 @@ void HAA_init_heap(){
 
     HAA_heap_initialized = -1;
 
+    printk_syslog_timestamp();
+    printk_syslog("HEAP (as array) init done.\n");
 }

@@ -3,6 +3,7 @@
 #include "../idt.h"
 #include "../ioport.h"
 #include "../strings.h"
+#include "../task.h"
 
 #define HDD_PRIMARY_PORT    0x1f0
 #define HDD_SECONDARY_PORT  0x170
@@ -42,6 +43,7 @@ u8 hdc_drive_busy(){
     while((state & HDD_STATE_BUSY) == HDD_STATE_BUSY){
         count--;
         if(count < 2){
+            printk_syslog_timestamp();
             printk_syslog("HDD: busy.\n");
             return true;
         }
@@ -61,6 +63,7 @@ u8 hdc_drive_ready(){
     while((state & HDD_STATE_DRDY) != HDD_STATE_DRDY){
         count--;
         if(count < 2){
+            printk_syslog_timestamp();
             printk_syslog("HDD: not ready.\n");
             return false;
         }
@@ -80,6 +83,7 @@ u8 hdc_drive_seek(){
     while((state & HDD_STATE_DSC) != HDD_STATE_DSC){
         count--;
         if(count < 2){
+            printk_syslog_timestamp();
             printk_syslog("HDD: seeking.\n");
             return true;
         }
@@ -99,6 +103,7 @@ u4 hdc_drive_data_ready(){
     while((state & HDD_STATE_DRQ) != HDD_STATE_DRQ){
         count--;
         if(count < 2){
+            printk_syslog_timestamp();
             printk_syslog("HDD: data not ready.\n");
             return false;
         }
@@ -132,6 +137,7 @@ void hdd_read_sector_nosafe(u2 *buff, u8 sector){
     }
 
     if(hdc_drive_error()){
+        printk_syslog_timestamp();
         printk_syslog("HDD: drive error\n");
         return;
     }
@@ -180,6 +186,7 @@ void hdd_write_sector_nosafe(u2 *buff, u8 sector){
     }
 
     if(hdc_drive_error()){
+        printk_syslog_timestamp();
         printk_syslog("HDD: drive error\n");
         return;
     }
@@ -212,37 +219,29 @@ void hdd_write_sector_nosafe(u2 *buff, u8 sector){
 
 }
 
-u1 hdc_in_use=0;
+GCS_CREATE(hdd_read);
 
 void hdd_read_sector(unsigned char *buff, u8 sector){
 #if DEBUG(E_NOTICE, ES_HDD)
+    printk_syslog_timestamp();
     printk_syslog("HDD: read sector: ");
     printk_syslog_number(sector,'h');
     printk_syslog(" \n");
 #endif
 
-    u4 timeout=1000;
-    if (hdc_in_use != 0){
-        //printk_syslog(": HDC : We must wait previos IO.\n");
-    }
+    GCS_WAIT_TIMEOUT(hdd_read, 1000);
 
-    while ((hdc_in_use != 0) && (timeout>0)){
-        //timer_sleep(10);
-        //for (ii=0; ii<100; ii++);
-//        switch_task();
-//        switch_task(0); // make delay by switching a task
-        timeout--;
-    }
-    if (hdc_in_use != 0){
-        printk_syslog("!!! Time out for waiting HDC...\n");
+    if(GCS_IN_USE(hdd_read)){
+        printk_syslog_timestamp();
+        printk_syslog("HDD: !!! Time out for waiting HDC...\n");
         return;
     }
 
-    hdc_in_use++;
+    GCS_BEGIN(hdd_read);
 
     hdd_read_sector_nosafe((u2*)buff, sector);
 
-    hdc_in_use--;
+    GCS_DONE(hdd_read);
 
     //switch_task();
 
@@ -250,32 +249,25 @@ void hdd_read_sector(unsigned char *buff, u8 sector){
 
 void hdd_write_sector(unsigned char *buff, u4 sector){
 #if DEBUG(E_NOTICE, ES_HDD)
+    printk_syslog_timestamp();
     printk_syslog("HDD: write sector: ");
     printk_syslog_number(sector,'h');
     printk_syslog(" \n");
 #endif
 
-    u4 timeout=1000;
-    if (hdc_in_use != 0){
-        //printk_syslog(": HDC : We must wait previos IO.\n");
-    }
-    while ((hdc_in_use != 0) && (timeout>0)){
-        //timer_sleep(10);
-        //for (ii=0; ii<100; ii++);
-//        switch_task();
-//        switch_task(0); // make delay by switching a task
-        timeout--;
-    }
-    if (hdc_in_use != 0){
-        printk_syslog("!!! Time out for waiting HDC...\n");
+    GCS_WAIT_TIMEOUT(hdd_read, 1000);
+
+    if(GCS_IN_USE(hdd_read)){
+        printk_syslog_timestamp();
+        printk_syslog("HDD: !!! Time out for waiting HDC...\n");
         return;
     }
 
-    hdc_in_use++;
+    GCS_BEGIN(hdd_read);
 
     hdd_write_sector_nosafe((u2*)buff, sector);
 
-    hdc_in_use--;
+    GCS_DONE(hdd_read);
 
     //switch_task();
 
@@ -301,6 +293,7 @@ void detect_hdd(){
 
     /* differentiate ATA, ATAPI, SATA and SATAPI */
 #if DEBUG(E_NOTICE, ES_HDD)
+    printk_syslog_timestamp();
     printk_syslog("HDD drive (primary master) is: ");
     if (cl==0x14 && ch==0xEB)
         printk_syslog("PATAPI");
@@ -310,7 +303,13 @@ void detect_hdd(){
         printk_syslog("PATA");
     else if (cl==0x3c && ch==0xc3)
         printk_syslog("SATA");
-    else printk_syslog("UNKNOWN");
+    else
+    {
+        printk_syslog("UNKNOWN: cl=0x");
+        printk_syslog_number(cl, 'h');
+        printk_syslog(" ch=0x");
+        printk_syslog_number(ch, 'h');
+    }
     printk_syslog("\n");
 #endif
 }
@@ -320,7 +319,9 @@ extern boot_drive_read_sector;
 extern boot_drive_write_sector;
 
 void hdd_callback(registers_t *reg){
-    // empty
+
+    GCS_DONE(hdd_read);
+
 }
 
 void init_hdd(u1 Boot_drive){
@@ -334,9 +335,8 @@ void init_hdd(u1 Boot_drive){
     // detect
     detect_hdd();
 
-    //register_interrupt_handler(45, &hdd0_callback);
-
-    hdc_in_use = 0;
+    // 46 for primary
+    register_interrupt_handler(46, &hdd_callback);
 
     hdd_reset();
 
@@ -352,5 +352,6 @@ void init_hdd(u1 Boot_drive){
     // Turning motor off
     //outb (0x3F2, 0xC);
 
+    printk_syslog_timestamp();
     printk_syslog("HDD init done.\n");
 }

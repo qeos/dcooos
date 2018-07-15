@@ -77,6 +77,7 @@ void register_interrupt_handler(u1 n, pointer handler)
 void isr_handler(registers_t regs)
 {
 #if DEBUG(E_NOTICE, ES_IDT)
+    printk_syslog_timestamp();
     printk_syslog("isr interrupt: 0x");
     printk_syslog_number(regs.int_no,'h');
     printk_syslog("\n");
@@ -94,8 +95,9 @@ void isr_handler(registers_t regs)
     else
     {
 #if DEBUG_LEVEL & E_NOTICE
-        printk_syslog("unhandled interrupt: 0x");
-        printk_syslog_number(int_no,'h');
+        printk_syslog_timestamp();
+        printk_syslog("unhandled interrupt: ");
+        printk_syslog_number(int_no,'d');
         printk_syslog("\n");
         idt_dump_state(regs);
 #endif // DEBUG_LEVEL
@@ -109,8 +111,9 @@ void irq_handler(registers_t regs)
 {
 #if DEBUG(E_NOTICE, ES_IDT)
     if (regs.int_no != 32){
-        printk_syslog("irq interrupt: 0x");
-        printk_syslog_number(regs.int_no,'h');
+        printk_syslog_timestamp();
+        printk_syslog("irq interrupt: ");
+        printk_syslog_number(regs.int_no,'d');
         printk_syslog("\n");
     }
 #endif
@@ -279,6 +282,7 @@ void init_idt(){
     idt_flush((u8)&idt_ptr);
     asm volatile("sti");
 
+    printk_syslog_timestamp();
     printk_syslog("IDT init done.\n");
 
 }

@@ -13,27 +13,29 @@ u8 syscall_run(u8 meth, GUID guid, u8 *params){
     u8 old_pdir;
     u8 result = 0;
     if ((obj->pdir == objects_main_tree->pdir) || (obj->pdir == current_task->pdir)){
-#if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("\tSYSCALL: call local in '");
-            printk_syslog_numberInFormat(obj->pdir,'h',16);
-            printk_syslog("' ");
-            printk_syslog(obj->name);
-            printk_syslog(".");
-            printk_syslog(params[1]);
-            printk_syslog("(");
-            u8 i;
-            for(i=2; i<=params[0]; i++){
-                if(i!=2){
-                    printk_syslog(", ");
-                }
-                printk_syslog(params[i]);
-            }
-            printk_syslog(")\n");
-#endif
+//#if DEBUG(E_NOTICE, ES_SYSCALL)
+//            printk_syslog_timestamp();
+//            printk_syslog("\tSYSCALL:  call localy in '");
+//            printk_syslog_numberInFormat(obj->pdir,'h',16);
+//            printk_syslog("' ");
+//            printk_syslog(obj->name);
+//            printk_syslog(".");
+//            printk_syslog(params[1]);
+//            printk_syslog("(");
+//            u8 i;
+//            for(i=2; i<=params[0]; i++){
+//                if(i!=2){
+//                    printk_syslog(", ");
+//                }
+//                printk_syslog(params[i]);
+//            }
+//            printk_syslog(")\n");
+//#endif
         result = method(guid, params);
     }else{
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("\tSYSCALL: call switched in '");
+            printk_syslog_timestamp();
+            printk_syslog("\tSYSCALL:  call switched in '");
             printk_syslog_numberInFormat(obj->pdir,'h',16);
             printk_syslog("'\n");
 #endif
@@ -77,7 +79,8 @@ u8 syscall_callback(registers_t *regs){
 
 #if DEBUG(E_NOTICE, ES_SYSCALL)
     t_object *dyn = obj_find(obj);
-    printk_syslog("\tSYSCALL: We has a call from task ");
+    printk_syslog_timestamp();
+    printk_syslog("\tSYSCALL: Call from task ");
     printk_syslog_numberInFormat(current_task->id,'d',16);
     printk_syslog(" object '");
     printk_syslog(dyn->name);
@@ -98,12 +101,15 @@ u8 syscall_callback(registers_t *regs){
         t_object *tobj = obj_find(obj);
         while (tobj->sup != 0){
             tobj = tobj->sup;
+            meth = obj_method_get(tobj->guid, earr[1]);
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("\tSYSCALL: try to get method in '");
+            printk_syslog_timestamp();
+            printk_syslog("\tSYSCALL: ... try to get method in '");
             printk_syslog(tobj->name);
+            printk_syslog("' : 0x");
+            printk_syslog_number(meth, 'h');
             printk_syslog("'\n");
 #endif
-            meth = obj_method_get(tobj->guid, earr[1]);
             if (meth != 0)
                 break;
         }
@@ -111,7 +117,8 @@ u8 syscall_callback(registers_t *regs){
             result = syscall_run(meth, obj, earr);
         }else{
 #if DEBUG(E_NOTICE, ES_SYSCALL)
-            printk_syslog("\tSYSCALL: Method '");
+            printk_syslog_timestamp();
+            printk_syslog("\tSYSCALL ERROR: Method '");
             printk_syslog(earr[1]);
             printk_syslog("' not found.\n");
 #endif
@@ -134,5 +141,6 @@ u8 syscall_callback(registers_t *regs){
 void init_syscall(){
     register_interrupt_handler(128, &syscall_callback);
 
+    printk_syslog_timestamp();
     printk_syslog("SYSCALL init done.\n");
 }

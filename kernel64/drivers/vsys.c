@@ -85,6 +85,7 @@ vnode_t *vfindnode(char *path){
         printkd_bochs(node, 'h');
         printk_syslog("\n");*/
         if(node==0){
+            printk_syslog_timestamp();
             printk_syslog("VSYS: file '");
             printk_syslog(path);
             printk_syslog("' not found\n");
@@ -138,6 +139,7 @@ void init_vsys(){
     #endif // PRINTK_INTO_SERIAL
 #endif // VMWARE
 
+    printk_syslog_timestamp();
     printk_syslog("VSYS init done.\n");
 
 }

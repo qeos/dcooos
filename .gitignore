@@ -37,6 +37,7 @@
 
 # codeblocks files
 *.save
+kernel64/*.save
 
 # VMWare
 VMImage/*.lck/*
@@ -50,6 +51,7 @@ VMImage/serial.out
 # BOCHS
 BOCHSImage/*.out
 BOCHSImage/*.ini
+*.lock
 
 #some compiler
 kernel64/*.i

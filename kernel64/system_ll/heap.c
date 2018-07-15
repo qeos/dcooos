@@ -74,11 +74,13 @@ void init_heap(){
 
     heap_init();
 
-    printk_syslog("Found ");
+    printk_syslog_timestamp();
+    printk_syslog("HEAP: Found ");
     printk_syslog_number(maxmem/1024/1024, 'd');
     printk_syslog(" Mb of memory\n");
 
-    printk_syslog("Free heap size: ");
+    printk_syslog_timestamp();
+    printk_syslog("HEAP: Free heap size: ");
     u8 free_heap = get_free_heap_size();
     if(free_heap/1024/1024 == 0){
         printk_syslog_number(free_heap/1024, 'd');
@@ -88,7 +90,8 @@ void init_heap(){
         printk_syslog(" Mbytes\n");
     }
 
-    printk_syslog("HEAP init done.\n");
+    printk_syslog_timestamp();
+    printk_syslog("HEAP: init done.\n");
 
 }
 

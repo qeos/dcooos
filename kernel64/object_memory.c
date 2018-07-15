@@ -5,9 +5,6 @@
 #include "main.h"
 #include "strings.h"
 
-// heap data from USER_HEAP to USER_HEAP+USER_HEAP_SIZE
-#define USER_HEAP   0x4000000
-#define USER_HEAP_SIZE  0x1000000
 
 u8 kfree_callback(GUID guid, u8 *params){
     u1 *some_var = params[2];
@@ -69,11 +66,14 @@ u8 require_video_memory(GUID guid, u8 *params){
     start = parametresHW->VBElfb;
     size = parametresHW->VBEResX * parametresHW->VBEResX * (parametresHW->VBEBPP / 8);
 #if DEBUG(E_NOTICE, ES_OBJECT_MEM)
-    printk_syslog("OBJECT_MALLOC: need video memory from: ");
+    printk_syslog_timestamp();
+    printk_syslog("\tOBJECT_MALLOC: need video memory from: ");
     printk_syslog_numberInFormat(start,'h',8);
     printk_syslog(" size: ");
     printk_syslog_number(size,'h');
-    printk_syslog("\n");
+    printk_syslog(" (");
+    printk_syslog_number(size,'d');
+    printk_syslog(")\n");
 #endif
 
     // need to switch to kernel PD

@@ -24,6 +24,8 @@ void _main(){
     printk_syslog_number(parametresHW->VBEResX, 'd');
     printk_syslog("x");
     printk_syslog_number(parametresHW->VBEResY, 'd');
+    printk_syslog("x");
+    printk_syslog_number(parametresHW->VBEBPP, 'd');
     printk_syslog("\n");
     printk_syslog("VESA lfb: ");
     printk_syslog_numberInFormat(parametresHW->VBElfb, 'h', 8);
@@ -63,6 +65,7 @@ void _main(){
 
     u8 index=0;
     while( (strlen(scriptdata+index)>0) && (index<script->length) ){
+        printk_syslog_timestamp();
         printk_syslog("Executing: '");
         printk_syslog(scriptdata+index);
         printk_syslog("'\n");
@@ -76,6 +79,7 @@ void _main(){
     show_objects();
 
 #if DEBUG_LEVEL & E_NOTICE
+    printk_syslog_timestamp();
     printk_syslog("Kernel initialized.\n");
     printk_syslog("--------------------------------------------------------------------------\n");
 #endif // DEBUG_LEVEL

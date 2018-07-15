@@ -1,8 +1,18 @@
 #include "main.h"
 #include "types.h"
 #include "time.h"
+#include "task.h"
+
+GCS_CREATE(printk_syslog);
 
 void printk_syslog(s1 *text){
+
+    CLI
+
+    GCS_WAIT(printk_syslog);
+
+    GCS_BEGIN(printk_syslog);
+
     int i=0;
     u8 j=0;
 
@@ -15,11 +25,18 @@ void printk_syslog(s1 *text){
         }
     }
 
+    GCS_DONE(printk_syslog);
+
+    STI
+
 }
 
 s1 *kbuf_number = "###############################";
 
 void printk_syslog_number(const u8 n, u1 type){
+
+    CLI
+
     u8 i=30;
     s1 *hh = "0123456789ABCDEF";
     u8 nn=n;
@@ -49,12 +66,17 @@ void printk_syslog_number(const u8 n, u1 type){
         printk_syslog("unknown type\n\r");
     }
     printk_syslog(&kbuf_number[i+1]);
+
+    STI
 }
 
 s1 *kbuf_numberInFormat = "################################";
 int kbuf_numberInFormatLen = 30;
 
 s1 *sprintk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
+
+    CLI
+
     u8 i=kbuf_numberInFormatLen;
     s1 *hh = "0123456789ABCDEF";
     u8 nn=n;
@@ -105,6 +127,8 @@ s1 *sprintk_syslog_numberInFormat(const u8 n, u1 type, u8 len){
     }else{
         printk_syslog("unknown type\n\r");
     }
+    STI
+
     return &kbuf_numberInFormat[i+1];
 }
 

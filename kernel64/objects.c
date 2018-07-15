@@ -107,6 +107,7 @@ t_object *obj_find(GUID guid){
 
 u1 *obj_findguid_callback(GUID guid, u8 *params){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Object find guid, params '");
     printk_syslog_number(params[0],'d');
     printk_syslog("'\n");
@@ -141,6 +142,7 @@ u1 *obj_findguid_callback(GUID guid, u8 *params){
 
 t_object *obj_getlast(t_object *objclass){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Get last object ");
     printk_syslog(GUID2str(objclass->guid));
     printk_syslog("\n");
@@ -156,6 +158,7 @@ t_object *obj_getlast(t_object *objclass){
 
 GUID obj_create(s1 *name, GUID classof){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Create new object '");
     printk_syslog(name);
     printk_syslog("'\n");
@@ -211,6 +214,7 @@ GUID obj_create(s1 *name, GUID classof){
 
     STI
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Object crated '");
     printk_syslog(name);
     printk_syslog("' ");
@@ -222,6 +226,7 @@ GUID obj_create(s1 *name, GUID classof){
 }
 u8 obj_create_callback(GUID guid, u8 *params){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Create new object, params '");
     printk_syslog_number(params[0],'d');
     printk_syslog("'\n");
@@ -234,6 +239,7 @@ u8 obj_create_callback(GUID guid, u8 *params){
 void obj_destroy(GUID obj){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Destroy object '");
     printk_syslog(obj_d->name);
     printk_syslog("'\n");
@@ -302,6 +308,7 @@ void obj_destroy(GUID obj){
 }
 u8 obj_destroy_callback(GUID guid, u8 *params){
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Destroy object, params '");
     printk_syslog_number(params[0],'d');
     printk_syslog("'\n");
@@ -314,6 +321,7 @@ u8 obj_destroy_callback(GUID guid, u8 *params){
 void obj_property_add(GUID obj, u1 *propname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Adding property '");
     printk_syslog(obj_d->name);
     printk_syslog("'.'$");
@@ -363,6 +371,7 @@ void obj_property_add(GUID obj, u1 *propname){
 u8 obj_property_malloc(GUID obj, u1 *propname, u8 size){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: kmalloc('");
     printk_syslog(obj_d->name);
     printk_syslog("'.'$");
@@ -395,6 +404,7 @@ u8 obj_property_malloc(GUID obj, u1 *propname, u8 size){
     }
 
     prop->pointer = kmalloc(size);
+    prop->size = size;
 
     return prop->pointer;
 }
@@ -417,6 +427,7 @@ u8 obj_property_add_callback(GUID guid, u8 *params){
 t_property *obj_property_get(GUID obj, u1 *propname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Geting properties '");
     printk_syslog(propname);
     printk_syslog("' to object '");
@@ -440,6 +451,7 @@ t_property *obj_property_get(GUID obj, u1 *propname){
 u8 obj_property_get_value_u8(GUID obj, u1 *propname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Object '");
     printk_syslog(obj_d->name);
     printk_syslog("' get value of property '");
@@ -473,6 +485,7 @@ u8 obj_property_get_value_u8(GUID obj, u1 *propname){
 void obj_method_add(GUID obj, u1 *methname, u8 pointer){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Adding method '");
     printk_syslog(methname);
     printk_syslog("' to object '");
@@ -516,6 +529,7 @@ void obj_method_add(GUID obj, u1 *methname, u8 pointer){
 u8 obj_method_add_callback(GUID guid, u8 *params){
     t_object *obj_d = obj_find(guid);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Object method add, params '");
     printk_syslog_number(params[0],'d');
     printk_syslog("'\n");
@@ -527,6 +541,7 @@ u8 obj_method_add_callback(GUID guid, u8 *params){
         prop = obj_property_get(guid, params[3]+1);
         if (prop == 0){
 //            PD("property not found");
+            printk_syslog_timestamp();
             printk_syslog("OBJECTS: property '");
             printk_syslog(params[3]+1);
             printk_syslog("' in '");
@@ -543,6 +558,7 @@ u8 obj_method_add_callback(GUID guid, u8 *params){
 u8 obj_method_get(GUID obj, u1 *methname){
     t_object *obj_d = obj_find(obj);
 #if DEBUG(E_NOTICE, ES_OBJECTS)
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS: Getting pointer for method '");
     printk_syslog(methname);
     printk_syslog("' in object '");
@@ -560,14 +576,13 @@ u8 obj_method_get(GUID obj, u1 *methname){
     return 0;
 }
 
-#define OBJ_LEVEL_2
-
 void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
     t_object *obj = cur_obj;
     t_object *main_class = main_obj;
     u8 i;
     while (obj != 0){
         for(i=0;i<tab;i++) printk_syslog("  ");
+        printk_syslog_timestamp();
         printk_syslog("OBJECT ");
 //        printk_syslog(GUID2str(obj->guid));
         printk_syslog(" (");
@@ -578,56 +593,41 @@ void show_obj(t_object *cur_obj, t_object *main_obj, u8 tab){
         printk_syslog_number(obj->is_class,'d');
         printk_syslog(")\n");
 
-#ifdef OBJ_LEVEL_2
         // show propertyes
         t_property *prop = obj->property;
-#if DEBUG(E_NOTICE, ES_OBJECTS)
         if (prop != 0){
             for(i=0;i<tab;i++) printk_syslog("  ");
-            printk_syslog("_____propertyes_____\n");
+            printk_syslog("_____properties_____\n");
         }
-#endif
         while (prop != 0){
             for(i=0;i<tab+1;i++) printk_syslog("  ");
-#ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("'$");
-#endif
             printk_syslog(prop->name);
-#ifdef DEBUG_LEVEL & E_NOTICE
-            printk_syslog("'");
-#endif
+            printk_syslog("' size: ");
+            printk_syslog_number(prop->size, 'd');
             printk_syslog("\n");
             prop = prop->next;
         }
 
         // show methods
         t_method *meth = obj->method;
-#ifdef DEBUG_LEVEL & E_NOTICE
         if (meth != 0){
             for(i=0;i<tab;i++) printk_syslog("  ");
             printk_syslog("_____methods_____\n");
         }
-#endif
         while (meth != 0){
             for(i=0;i<tab+1;i++) printk_syslog("  ");
-#ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("'");
-#endif
             printk_syslog(meth->name);
-#ifdef DEBUG_LEVEL & E_NOTICE
             printk_syslog("'\tat 0x");
             printk_syslog_numberInFormat(meth->pointer,'h',8);
             printk_syslog("()");
-#endif
             printk_syslog("\n");
             meth = meth->next;
         }
-#endif
         if (obj->sub != 0){
             for(i=0;i<tab;i++) printk_syslog("  ");
-#if DEBUG(E_NOTICE, ES_OBJECTS)
             printk_syslog("_____subobjects_____\n");
-#endif
             show_obj(obj->sub, obj, tab+1);
         }
 
@@ -690,6 +690,7 @@ void init_objects(){
     obj_method_add(bo, "find_object", &obj_findguid_callback);
     obj_method_add(bo, "cli", &cli_callback);
     obj_method_add(bo, "sti", &sti_callback);
+    obj_method_add(bo, "show_objects", &show_objects);
 
     // memory
     GUID memo = obj_create("memory", bo);
@@ -730,6 +731,7 @@ void init_objects(){
 */
 #endif
 
+    printk_syslog_timestamp();
     printk_syslog("OBJECTS init done.\n");
 }
 

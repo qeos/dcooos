@@ -49,13 +49,27 @@ void getTime(){
 
 u8 get_globalticks(){
 //    getTime();
+
+//    asm volatile("rdtsc;\r\
+//                 shlq $32, %%rdx;\r\
+//                 orl %%eax, %%edx":"=d"(startupTime.gticks));
+
     asm volatile("rdtsc":"=a"(startupTime.gticks));
+
 //#if DEBUG(E_NOTICE, ES_TIME)
 //    printk_syslog("TIMER: get global ticks: ");
 //    printk_syslog_number(startupTime.gticks, 'd');
 //    printk_syslog("\n");
 //#endif // DEBUG
     return startupTime.gticks;
+}
+
+void printk_syslog_timestamp(){
+#if DEBUG(E_NOTICE, ES_TIME | ES_TIMESTAMP)
+    u8 gt = get_globalticks();
+    printk_syslog_numberInFormat(gt,'d',16);
+    printk_syslog(": ");
+#endif
 }
 
 void printk_syslog_currentTime(){
@@ -81,21 +95,28 @@ extern u8 ticks_per_process;
 
 void init_time(){
 
+    u8 ticks_per_process_before;
+    u8 ticks_per_process_after;
+    u8 ticks_per_process_delta;
+
     getTime();
     // calculate speed of system
-    u1 cursec = startupTime.seconds;
-    while(cursec == startupTime.seconds) getTime();
-    u8 ticks_per_process_before = get_globalticks();
-    cursec = startupTime.seconds;
-    while(cursec == startupTime.seconds) getTime();
-    u8 ticks_per_process_after = get_globalticks();
-    u8 ticks_per_process_delta = ticks_per_process_after - ticks_per_process_before;
+    ticks_per_process_before = get_globalticks();
+
+    u1 cursec = startupTime.seconds + 2;
+    if(cursec > 59) cursec = 2;
+    while(cursec != startupTime.seconds) getTime();
+
+    ticks_per_process_after = get_globalticks();
+    ticks_per_process_delta = ticks_per_process_after - ticks_per_process_before;
     ticks_per_process = ticks_per_process_delta >> 19;
     if(ticks_per_process > 100) ticks_per_process = 10;
 
 
 #if DEBUG(E_NOTICE, ES_TIME)
     printk_syslog_currentTime();
+
+    printk_syslog_timestamp();
     printk_syslog("TIMER: ticks: after - before = delta >> 19 = time: ");
     printk_syslog_number(ticks_per_process_after, 'd');
     printk_syslog(" - ");
@@ -108,6 +129,7 @@ void init_time(){
 #endif
 
 #if DEBUG(E_NOTICE, ES_TIME)
+    printk_syslog_timestamp();
     printk_syslog("TIMER init done.\n");
 #endif // DEBUG_LEVEL
 }

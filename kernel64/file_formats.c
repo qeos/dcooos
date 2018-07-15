@@ -14,6 +14,7 @@ void loading_pe_file(vnode_t *file, task_t *task){
     vread(file, real_PE_offset, PE_HEADER_SIZE, header);
 
 #if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog_timestamp();
     printk_syslog("FILE FORMATS: load_pe\n");
     printk_syslog("\tSIGN: "); printk_syslog(&header->pe_sign);
     printk_syslog("\tCPU-TYPE: "); printk_syslog_number(header->pe_cputype,'h');
@@ -32,7 +33,9 @@ void loading_pe_file(vnode_t *file, task_t *task){
     printk_syslog("Section name\tvSize\t\tvAddr\t\tpSize\t\tpOffset\t\tlineNum\t\tlineOffset\trelNum\t\trelOffset\tFlags\n");
 #endif
 
-    u8 exec_addr = 0;
+    // try to change code base
+    // we can do it because in 64x all data has relative aligns
+    u8 exec_addr = USER_CODE;
 
     // read all objects into mem
     for( i=0; i < header->pe_objnum; i++){
@@ -64,15 +67,16 @@ void loading_pe_file(vnode_t *file, task_t *task){
         // check for execution point
         if ((oheader->o_flags & SF_EXECUTABLE) == SF_EXECUTABLE){
             if(exec_addr == 0){
-                exec_addr = header->pe_image_base+oheader->o_vaddr;
+                exec_addr = USER_CODE + header->pe_image_base+oheader->o_vaddr;
             }
         }
 
     }
     // set execution pointer
     if (header->pe_code_base != 0){
-        exec_addr = header->pe_image_base+header->pe_code_base;
+        exec_addr = USER_CODE + header->pe_image_base+header->pe_code_base;
     }
+
     task->stack.rip = exec_addr;
 
 //    u8 *pdir = make_user_pd();
@@ -82,6 +86,7 @@ void loading_pe_file(vnode_t *file, task_t *task){
     u8 old_pdir;
 
 #if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog_timestamp();
     printk_syslog("FILE FORMATS: Reading program to PD: ");
     printk_syslog_numberInFormat(pdir,'h',8);
     printk_syslog("\n");
@@ -93,8 +98,9 @@ void loading_pe_file(vnode_t *file, task_t *task){
 //        make_user_area(pdir, header->pe_image_base+oheader->o_vaddr, oheader->o_vsize);
 
 #if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog_timestamp();
     printk_syslog("FILE FORMATS: load data into: ");
-    printk_syslog_numberInFormat(header->pe_image_base+oheader->o_vaddr,'h',8);
+    printk_syslog_numberInFormat(USER_CODE + header->pe_image_base+oheader->o_vaddr,'h',8);
     printk_syslog(" size: ");
     printk_syslog_numberInFormat(oheader->o_psize,'h',8);
     printk_syslog("\n");
@@ -107,12 +113,13 @@ void loading_pe_file(vnode_t *file, task_t *task){
 //    asm volatile("xchg %bx, %bx");
         asm volatile("movq %%cr3, %0" : "=r" (old_pdir));
         asm volatile("movq %0, %%cr3" :: "r" (pdir));
-        vread(file, oheader->o_poff, oheader->o_psize, header->pe_image_base+oheader->o_vaddr);
+        vread(file, oheader->o_poff, oheader->o_psize, USER_CODE + header->pe_image_base+oheader->o_vaddr);
         asm volatile("movq %0, %%cr3" :: "r" (old_pdir));
 
     }
 
 #if DEBUG(E_NOTICE, ES_FILEFORMATS)
+    printk_syslog_timestamp();
     printk_syslog("FILE FORMATS: Image EIP: ");
     printk_syslog_numberInFormat(exec_addr,'h',8);
     printk_syslog(" pdir: ");

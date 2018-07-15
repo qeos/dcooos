@@ -170,17 +170,19 @@ void put_line(u8 x1,u8 y1,u8 x2,u8 y2,t_color nState)
 #if BPP == 2
 
 #define SET_RGB(_t_color_var, R, G, B)\
-    _t_color_var.rgb[0] = (u1*)(((R & 0xf8) << 0x08) | ((G & 0xfc) << 5) | (B >> 3));
+    _t_color_var.rgb[0] = (u2*)(((R & 0xf8) << 0x08) | ((G & 0xfc) << 5) | (B >> 3));
 
 #elif BPP == 3
 
 #define SET_RGB(_t_color_var, R, G, B)\
-    _t_color_var.rgb[0] = (u1*)((R<<16) | (G<<8) | (B));
+    _t_color_var.rgb[0] = (u3*)((R<<16) | (G<<8) | (B));
 
 #elif BPP == 4
 
 #define SET_RGB(_t_color_var, R, G, B)\
-    _t_color_var.rgb[0] = (u1*)((R<<16) | (G<<8) | (B));
+    _t_color_var.rgb[0] = (u4*)((R<<16) | (G<<8) | (B));
+#define SET_RGBA(_t_color_var, R, G, B, A)\
+    _t_color_var.rgb[0] = (u4*)((A<<24) | (R<<16) | (G<<8) | (B));
 
 #endif // BPP
 
@@ -393,7 +395,13 @@ void initialize_object(){
     _OBJ_SET_PROPERTY_U8(video, tmp, &video_print_callback);
     _OBJ_CALL(video, "new_method print $tmp");
 
+    _OBJ_INIT_GLOBAL(0, memory);
+    _OBJ_NEW_PROPERTY_U8_GLOBAL(memory, req_mem);
+
     _OBJ_SET_PROPERTY_U8(memory, req_mem, 256);
+
+    _OBJ_CALL(0, "show_objects");
+
     kbuf = _OBJ_CALL(memory, "malloc $req_mem");
 
 #ifdef DEBUG_VIDEO
@@ -403,7 +411,7 @@ void initialize_object(){
 // ---------------------------------------------------------------------
 
 #ifdef DEBUG_VIDEO
-    _OBJ_CALL(log, "print \"OBJECT VIDEO: require video memory 1024x768\"");
+    _OBJ_CALL(log, "print \"OBJECT VIDEO: require video memory 800x600\"");
 #endif // DEBUG_VIDEO
     _OBJ_INIT_GLOBAL(0,memory);
     _OBJ_NEW_PROPERTY_U8_GLOBAL(memory, req_mem);
@@ -431,12 +439,17 @@ void initialize_object(){
     u8* s = 0x10000;
     s[0] = video_buffer;
 
-//    video_buffer = vbe_lfb;
-//    t_color c;
-//    SET_RGB(c, 0xff, 0x00, 0x00);
-//    put_line(0,0,800,600, c);
-////    show_video_buffer();
-//HLT;
+    video_buffer = vbe_lfb;
+    t_color c;
+    SET_RGB(c, 0xff, 0x00, 0x00);
+    put_line(0,0,800,600, c);
+    show_video_buffer();
+
+    _OBJ_INIT(0, system);
+
+    for(u4 i=0; i<800; i++){
+        put_line(i, 0, i, 600, c);
+    }
 
 #ifdef DEBUG_VIDEO
     _OBJ_CALL(log, "print \"OBJECT VIDEO: printing hello message\"");
@@ -520,7 +533,7 @@ void initialize_object(){
     put_box(0,0,100,100,ccc);
     //copy_rect(dst, mem, dst, video_buffer);
 
-    _OBJ_INIT(0, system);
+//    _OBJ_INIT(0, system);
 u1 zx = 0xff;
     while(1){
 //        if (ii>100){

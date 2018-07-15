@@ -29,25 +29,19 @@ u8 HAT_kmalloc_withoutlog(u8 len){
         if(rec->prev){
             pn = rec->prev;
             if(pn->next != rec){
-                while(1){
-                    asm("hlt");
-                };
+                HLT;
             }
         }
         if(rec->next){
             pn = rec->next;
             if(pn->prev != rec){
-                while(1){
-                    asm("hlt");
-                };
+                HLT;
             }
         }
 
         rec = (u8)rec + rec->size + sizeof(t_HAT_heap_rec);
         if((u8)rec >= KERNEL_HEAP+KERNEL_HEAP_SIZE){
-            while(1){
-                asm("hlt");
-            };
+            HLT;
         }
     }
 
@@ -135,7 +129,7 @@ static void HAT_join_free(){
 
 u8 HAT_get_free_heap_size(){
     t_HAT_heap_rec *rec = (t_HAT_heap_rec*)(KERNEL_HEAP);
-    u4 size = 0;
+    u8 size = 0;
     while ((u8)rec < KERNEL_HEAP+KERNEL_HEAP_SIZE){
         if(rec->state == HEAP_STATE_FREE)
             size += rec->size;
@@ -170,46 +164,19 @@ void HAT_init_heap(){
     rec->prev = 0;
     rec->next = 0;
 
-#ifdef DEBUG_HEAP
-#ifdef DEBUG_HEAP_AS_LOG
-    t_heap_log *new_rec = (t_heap_log*)kmalloc_withoutlog(sizeof(t_heap_log));
-    new_rec->callback = __builtin_return_address(0);
-    new_rec->ptr = 0;
-    new_rec->len = 0;
-    new_rec->action = DEBUG_HEAP_LOG_START;
-    new_rec->next = 0;
-
-    heap_log_start = new_rec;
-    heap_log_curr = new_rec;
-#endif // DEBUG_HEAP_AS_LOG
-#endif // DEBUG_HEAP
-
     // debug/out
-    init_debug();
     HAT_current_heap_size = HAT_get_free_heap_size();
 
-    printk_bochs("--------------------------------------------------------------------------\n");
-    printk_bochs("System boot up...\n\n");
+    printk_syslog("--------------------------------------------------------------------------\n");
+    printk_syslog("System boot up...\n\n");
 
-    printk_bochs("Found ");
-    printkd_bochs(maxmem/1024/1024, 'd');
-    printk_bochs(" Mb of memory\n");
-    printk_bochs("Free heap size: ");
-    printkd_bochs(HAT_current_heap_size/1024, 'd');
-    printk_bochs(" Kb of heap\n");
+    printk_syslog("Found ");
+    printk_syslog_number(maxmem/1024/1024, 'd');
+    printk_syslog(" Mb of memory\n");
+    printk_syslog("Free heap size: ");
+    printk_syslog_number(HAT_current_heap_size/1024, 'd');
+    printk_syslog(" Kb of heap\n");
 
-#ifdef DEBUG_HEAP
-    PD("heap init")
-    printk_bochs("Maximum heap size = ");
-    if(KERNEL_HEAP_SIZE/1024/1024 == 0){
-        printkd_bochs(KERNEL_HEAP_SIZE/1024, 'd');
-        printk_bochs(" Kbytes\n");
-    }else{
-        printkd_bochs(KERNEL_HEAP_SIZE/1024/1024, 'd');
-        printk_bochs(" Mbytes\n");
-    }
-
-
-#endif
-    printk_bochs("HEAP init done.\n");
+    printk_syslog_timestamp();
+    printk_syslog("HEAP (as tree) init done.\n");
 }

@@ -65,6 +65,7 @@ void _main(){
 
     u8 index=0;
     while( (strlen(scriptdata+index)>0) && (index<script->length) ){
+        printk_syslog_timestamp();
         printk_syslog("Executing: '");
         printk_syslog(scriptdata+index);
         printk_syslog("'\n");
@@ -78,6 +79,7 @@ void _main(){
     show_objects();
 
 #if DEBUG_LEVEL & E_NOTICE
+    printk_syslog_timestamp();
     printk_syslog("Kernel initialized.\n");
     printk_syslog("--------------------------------------------------------------------------\n");
 #endif // DEBUG_LEVEL

@@ -137,6 +137,7 @@ void switch_task(registers_t *regs){
         return;
 
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: switching task\n");
 #endif
 
@@ -166,6 +167,7 @@ void switch_task(registers_t *regs){
         return;
     }
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: found task to switch ID = ");
     printk_syslog_number(new_task->id, 'd');
     printk_syslog("\n");
@@ -175,6 +177,7 @@ void switch_task(registers_t *regs){
 
 //    if((u8)regs == 0){
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: program task switch \n");
 #endif
         u8 rsp, rbp, rip, pdir;
@@ -185,6 +188,7 @@ void switch_task(registers_t *regs){
         rip = _read_rip();
         if(rip == 0x12345){
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: switch back \n");
 #endif
             switching = false;
@@ -205,6 +209,7 @@ void switch_task(registers_t *regs){
 //    }
 
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: from/to: ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog(" -> ");
@@ -216,6 +221,7 @@ void switch_task(registers_t *regs){
 #if DEBUG(E_NOTICE, ES_TASK)
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
+    printk_syslog_timestamp();
     printk_syslog("TASK: switch into RIP: ");
     printk_syslog_numberInFormat(current_task->stack.rip, 'h', 16);
     if(regs != 0){
@@ -260,6 +266,7 @@ u8 switch_pdir(u8 pdir){
 
     CLI
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: switch_pdir\n");
 #endif // DEBUG_TASK
 
@@ -270,6 +277,7 @@ u8 switch_pdir(u8 pdir){
     STI
 
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: Switch pdir ");
     printk_syslog_numberInFormat(old_pdir,'h',8);
     printk_syslog(" >>> ");
@@ -282,6 +290,7 @@ u8 switch_pdir(u8 pdir){
 
 void sleep(u8 sleep_time){
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: Task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog(" now sleeping. Working time: ");
@@ -300,6 +309,7 @@ void sleep(u8 sleep_time){
 u8 sleep_callback(GUID guid, u8 *params){
 //    t_object *obj_d = obj_find(guid);
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: Sleep to task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
@@ -311,6 +321,7 @@ u8 sleep_callback(GUID guid, u8 *params){
 
 u8 wait_callback(GUID guid, u8 *params){
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: Wait for task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
@@ -325,6 +336,7 @@ u8 wait_callback(GUID guid, u8 *params){
 
 u8 exit_callback(GUID guid, u8 *params){
 #if DEBUG(E_NOTICE, ES_TASK)
+    printk_syslog_timestamp();
     printk_syslog("TASK: Exit for task ");
     printk_syslog_number(current_task->id,'d');
     printk_syslog("\n");
@@ -381,6 +393,7 @@ void init_task(){
 
     register_interrupt_handler(32, &timer_callback);
 
+    printk_syslog_timestamp();
     printk_syslog("TASK init done.\n");
     some_var[0] = 0;
 }
